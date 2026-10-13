@@ -122,6 +122,15 @@ export interface DeliveryArea {
   coordinates?: { lat: number; lng: number };
 }
 
+export interface DaySchedule {
+  day: 'saturday' | 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday';
+  dayNameBn: string;
+  dayNameEn: string;
+  isOpen: boolean;
+  openTime: string;
+  closeTime: string;
+}
+
 export interface RestaurantSettings {
   restaurantName: BilingualText;
   tagline: BilingualText;
@@ -142,6 +151,7 @@ export interface RestaurantSettings {
   isOrderAccepting?: boolean;
   openingTime?: string;
   closingTime?: string;
+  weeklySchedule?: DaySchedule[];
   deliveryAreas: DeliveryArea[];
   paymentConfig: {
     cod: { enabled: boolean; label: BilingualText; instructions: BilingualText };

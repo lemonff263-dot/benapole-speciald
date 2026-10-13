@@ -14,7 +14,16 @@ export function BottomNav({
   setActiveTab: (tab: string) => void;
   onOpenTrack: () => void;
 }) {
-  const { lang, cartCount, isCartOpen, setIsCartOpen, setSelectedFoodForModal, setIsCheckoutOpen } = useApp();
+  const {
+    lang,
+    cartCount,
+    isCartOpen,
+    setIsCartOpen,
+    setSelectedFoodForModal,
+    setIsCheckoutOpen,
+    isTrackingOpen,
+    setIsTrackingOpen,
+  } = useApp();
   const [savedOrdersCount, setSavedOrdersCount] = useState<number>(0);
 
   useEffect(() => {
@@ -35,6 +44,7 @@ export function BottomNav({
     setIsCartOpen(false);
     setSelectedFoodForModal(null);
     setIsCheckoutOpen(false);
+    setIsTrackingOpen(false);
   };
 
   const navigateTo = (tab: string, scrollTargetId?: string) => {
@@ -90,6 +100,7 @@ export function BottomNav({
           onClick={() => {
             setSelectedFoodForModal(null);
             setIsCheckoutOpen(false);
+            setIsTrackingOpen(false);
             setIsCartOpen(!isCartOpen);
             setActiveTab('cart');
           }}
@@ -117,6 +128,7 @@ export function BottomNav({
           onClick={() => {
             closeAllOverlays();
             setActiveTab('orders');
+            setIsTrackingOpen(true);
             onOpenTrack();
           }}
           className="relative flex flex-col items-center justify-center min-h-[50px] py-1 text-stone-700 hover:text-[#0B5D3B] transition-all cursor-pointer font-bold"

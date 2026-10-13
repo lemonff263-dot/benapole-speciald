@@ -20,6 +20,16 @@ export function AdminLoginModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  React.useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      const isRemembered = localStorage.getItem('bs_admin_remember_me') === 'true';
+      const token = localStorage.getItem('bs_admin_token');
+      if (isRemembered && token) {
+        onLoginSuccess();
+      }
+    }
+  }, [isOpen, onLoginSuccess]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {

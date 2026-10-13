@@ -137,3 +137,37 @@ export async function getOrdersFromFirestore(): Promise<Order[]> {
     return [];
   }
 }
+
+/**
+ * Save restaurant settings to Firestore
+ */
+export async function saveSettingsToFirestore(settings: any): Promise<void> {
+  try {
+    const settingsRef = doc(db, 'config', 'restaurant_settings');
+    await setDoc(settingsRef, {
+      ...settings,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.warn('Firestore save settings non-blocking fallback:', err.message);
+  }
+}
+
+/**
+ * Sync entire menu and categories to Firestore
+ */
+export async function syncMenuToFirestore(foods: any[], categories: any[]): Promise<void> {
+  try {
+    const menuRef = doc(db, 'config', 'menu_catalog');
+    await setDoc(menuRef, {
+      foods,
+      categories,
+      syncedAt: new Date().toISOString(),
+    });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.warn('Firestore sync menu non-blocking fallback:', err.message);
+  }
+}
+

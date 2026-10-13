@@ -103,21 +103,21 @@ export function FoodCard({ food }: { food: FoodItem }) {
         {inCartQty > 0 && primaryCartItem ? (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center bg-[#0B5D3B] text-white rounded-xl sm:rounded-2xl p-0.5 sm:p-1 shadow-sm gap-0.5 sm:gap-1 border border-emerald-700 shrink-0"
+            className="flex items-center bg-[#0B5D3B] text-white rounded-2xl p-1 shadow-md gap-1 border border-emerald-700 shrink-0 h-11 sm:h-12"
           >
             <button
               onClick={() => updateCartQuantity(primaryCartItem.id, -1)}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg hover:bg-black/20 flex items-center justify-center font-black text-sm active:scale-90 transition-all cursor-pointer"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-black/20 flex items-center justify-center font-black text-base active:scale-90 transition-all cursor-pointer"
               aria-label="কমান"
             >
               −
             </button>
-            <span className="font-mono font-black text-xs sm:text-sm px-1.5 min-w-[20px] text-center text-white">
+            <span className="font-mono font-black text-sm sm:text-base px-2 min-w-[24px] text-center text-white">
               {inCartQty}
             </span>
             <button
               onClick={handleQuickAdd}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg hover:bg-black/20 flex items-center justify-center font-black text-sm active:scale-90 transition-all cursor-pointer"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-black/20 flex items-center justify-center font-black text-base active:scale-90 transition-all cursor-pointer"
               aria-label="বাড়ান"
             >
               +
@@ -126,11 +126,11 @@ export function FoodCard({ food }: { food: FoodItem }) {
         ) : (
           <button
             onClick={handleQuickAdd}
-            className="flex items-center justify-center h-9 sm:h-10 px-3.5 sm:px-4 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm gap-1.5 transition-all shadow-sm cursor-pointer shrink-0"
+            className="flex items-center justify-center h-11 sm:h-12 px-4 sm:px-5 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 text-white rounded-2xl font-black text-sm sm:text-base gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer shrink-0"
             aria-label={`অর্ডার করুন ${food.name.bn}`}
           >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F4D05F]" />
-            <span>{lang === 'bn' ? 'অর্ডার' : 'Add'}</span>
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-[#F4D05F]" />
+            <span>{lang === 'bn' ? 'অর্ডার করুন' : 'Order Now'}</span>
           </button>
         )}
       </div>

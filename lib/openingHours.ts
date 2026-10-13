@@ -26,8 +26,6 @@ export function formatTime12h(time24: string): string {
 }
 
 export function checkRestaurantOpenStatus(settings?: Partial<RestaurantSettings>): RestaurantOpenStatus {
-  const openingTime = settings?.openingTime || '10:00';
-  const closingTime = settings?.closingTime || '23:00';
   const isOrderAccepting = settings?.isOrderAccepting !== false && settings?.isOpen !== false;
 
   // Calculate Bangladesh Time (BST, UTC+6)
@@ -36,9 +34,38 @@ export function checkRestaurantOpenStatus(settings?: Partial<RestaurantSettings>
   const bdDate = new Date(utcMs + 6 * 3600000);
   const currentHour = bdDate.getHours();
   const currentMinute = bdDate.getMinutes();
+  const currentDayIndex = bdDate.getDay(); // 0 = Sunday, 1 = Monday, ... 6 = Saturday
   const currentTotalMin = currentHour * 60 + currentMinute;
 
   const currentBdTimeStr = formatTime12h(`${currentHour}:${currentMinute}`);
+
+  // Map JS getDay to day key
+  const dayKeyMap: Record<number, 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday'> = {
+    0: 'sunday',
+    1: 'monday',
+    2: 'tuesday',
+    3: 'wednesday',
+    4: 'thursday',
+    5: 'friday',
+    6: 'saturday',
+  };
+  const todayKey = dayKeyMap[currentDayIndex];
+
+  // Check today's schedule if weeklySchedule exists
+  let openingTime = settings?.openingTime || '10:00';
+  let closingTime = settings?.closingTime || '23:00';
+  let isTodayScheduledOpen = true;
+  let todayDayName = 'আজ';
+
+  if (settings?.weeklySchedule && settings.weeklySchedule.length > 0) {
+    const todaySched = settings.weeklySchedule.find((d) => d.day === todayKey);
+    if (todaySched) {
+      todayDayName = todaySched.dayNameBn;
+      isTodayScheduledOpen = todaySched.isOpen;
+      if (todaySched.openTime) openingTime = todaySched.openTime;
+      if (todaySched.closeTime) closingTime = todaySched.closeTime;
+    }
+  }
 
   const openParts = openingTime.split(':');
   const closeParts = closingTime.split(':');
@@ -69,6 +96,22 @@ export function checkRestaurantOpenStatus(settings?: Partial<RestaurantSettings>
     };
   }
 
+  // If closed specifically on this day according to weekly schedule
+  if (!isTodayScheduledOpen) {
+    return {
+      isOpen: false,
+      canAcceptOrders: false,
+      statusTextBn: `${todayDayName} সাপ্তাহিক বন্ধ`,
+      statusTextEn: 'Closed Today',
+      badgeColor: 'red',
+      reasonBn: `আজ ${todayDayName} আমাদের রেস্টুরেন্ট বন্ধ থাকে। পরবর্তী কার্যদিবসে সকাল ${openFormatted} টা থেকে অর্ডার করতে পারবেন।`,
+      reasonEn: `The restaurant is closed today (${todayDayName}). Please order on next open day from ${openFormatted}.`,
+      currentBangladeshTime: currentBdTimeStr,
+      openingTimeFormatted: openFormatted,
+      closingTimeFormatted: closeFormatted,
+    };
+  }
+
   // Check if current Bangladesh time is within opening and closing times
   let isWithinHours = false;
   if (openTotalMin <= closeTotalMin) {
@@ -85,7 +128,7 @@ export function checkRestaurantOpenStatus(settings?: Partial<RestaurantSettings>
       statusTextBn: 'এখন বন্ধ আছে',
       statusTextEn: 'Currently Closed',
       badgeColor: 'red',
-      reasonBn: `রেস্টুরেন্ট এখন বন্ধ আছে। আমাদের অর্ডার গ্রহণের সময় প্রতিদিন সকাল ${openFormatted} থেকে রাত ${closeFormatted} পর্যন্ত। অনুগ্রহ করে নির্দিষ্ট সময়ে অর্ডার করুন।`,
+      reasonBn: `রেস্টুরেন্ট এখন বন্ধ আছে। আমাদের অর্ডার গ্রহণের সময় সকাল ${openFormatted} থেকে রাত ${closeFormatted} পর্যন্ত। অনুগ্রহ করে নির্দিষ্ট সময়ে অর্ডার করুন।`,
       reasonEn: `Restaurant is currently closed. Opening hours: ${openFormatted} - ${closeFormatted}.`,
       currentBangladeshTime: currentBdTimeStr,
       openingTimeFormatted: openFormatted,

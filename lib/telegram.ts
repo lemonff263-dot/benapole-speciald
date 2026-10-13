@@ -105,3 +105,22 @@ export function formatStatusUpdateMessage(order: Order, newStatus: string): stri
 <b>মোট বিল:</b> ৳${order.total} (${order.paymentMethod.toUpperCase()})
 ━━━━━━━━━━━━━━━━━━`;
 }
+
+export function formatRestaurantToggleMessage(isAccepting: boolean): string {
+  return `🏪 <b>রেস্টুরেন্ট অর্ডার সার্ভিস আপডেট</b>
+━━━━━━━━━━━━━━━━━━
+<b>স্ট্যাটাস:</b> ${isAccepting ? '✅ অর্ডার গ্রহণ চালু (ON)' : '🛑 অর্ডার গ্রহণ সাময়িক বন্ধ (OFF)'}
+<b>সময়:</b> ${new Date().toLocaleString('bn-BD')}
+━━━━━━━━━━━━━━━━━━
+<i>বেনাপোল স্পেশাল কিচেন ম্যানেজমেন্ট</i>`;
+}
+
+export function formatScheduleUpdateMessage(summary: string): string {
+  return `⏰ <b>সাপ্তাহিক সময়সূচি আপডেট করা হয়েছে!</b>
+━━━━━━━━━━━━━━━━━━
+${summary}
+<b>সময়:</b> ${new Date().toLocaleString('bn-BD')}
+━━━━━━━━━━━━━━━━━━
+<i>বেনাপোল স্পেশাল অ্যাডমিন</i>`;
+}
+

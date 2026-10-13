@@ -37,9 +37,9 @@ import {
 } from 'lucide-react';
 import { Order, FoodItem, Category, Offer, RestaurantSettings, DeliveryArea } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { defaultSettings } from '@/lib/constants';
+import { defaultSettings, defaultWeeklySchedule } from '@/lib/constants';
 import { ImageDropzone } from '../ImageDropzone';
-import { checkRestaurantOpenStatus } from '@/lib/openingHours';
+import { checkRestaurantOpenStatus, formatTime12h } from '@/lib/openingHours';
 
 const getAdminHeaders = () => {
   const token =
@@ -55,9 +55,11 @@ const getAdminHeaders = () => {
 
 export function AdminDashboard({
   onOpenCustomizer,
+  onClose,
   onLogout,
 }: {
   onOpenCustomizer: () => void;
+  onClose?: () => void;
   onLogout: () => void;
 }) {
   const { lang, t, refreshMenuData } = useApp();
@@ -660,6 +662,66 @@ export function AdminDashboard({
     }
   };
 
+  const handleToggleDayOpen = async (dayKey: string) => {
+    const currentList = settingsState.weeklySchedule && settingsState.weeklySchedule.length > 0
+      ? settingsState.weeklySchedule
+      : defaultWeeklySchedule;
+    
+    const updated = currentList.map((d) => {
+      if (d.day === dayKey) {
+        return { ...d, isOpen: !d.isOpen };
+      }
+      return d;
+    });
+
+    const newSettings = { ...settingsState, weeklySchedule: updated };
+    setSettingsState(newSettings);
+
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: getAdminHeaders(),
+        body: JSON.stringify(newSettings),
+      });
+      if (res.ok) {
+        const targetDay = updated.find((d) => d.day === dayKey);
+        showToast(`${targetDay?.dayNameBn} ${targetDay?.isOpen ? 'সফলভাবে খোলা (ON) করা হয়েছে' : 'সফলভাবে বন্ধ (OFF) করা হয়েছে'}`);
+        refreshMenuData();
+      }
+    } catch {
+      showToast('আপডেট ব্যর্থ হয়েছে');
+    }
+  };
+
+  const handleDayTimeChange = async (dayKey: string, field: 'openTime' | 'closeTime', val: string) => {
+    const currentList = settingsState.weeklySchedule && settingsState.weeklySchedule.length > 0
+      ? settingsState.weeklySchedule
+      : defaultWeeklySchedule;
+    
+    const updated = currentList.map((d) => {
+      if (d.day === dayKey) {
+        return { ...d, [field]: val };
+      }
+      return d;
+    });
+
+    const newSettings = { ...settingsState, weeklySchedule: updated };
+    setSettingsState(newSettings);
+
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: getAdminHeaders(),
+        body: JSON.stringify(newSettings),
+      });
+      if (res.ok) {
+        refreshMenuData();
+      }
+    } catch {
+      // non-blocking
+    }
+  };
+
   // Dedicated Save Telegram Configuration
   const handleSaveTelegramConfig = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -843,16 +905,33 @@ export function AdminDashboard({
             {/* Visual Customizer Launch Button */}
             <button
               onClick={onOpenCustomizer}
-              className="flex items-center gap-1.5 bg-[#F7931E] hover:bg-[#E58210] active:scale-95 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition-all"
+              className="flex items-center gap-1.5 bg-[#F7931E] hover:bg-[#E58210] active:scale-95 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition-all cursor-pointer"
             >
               <Palette className="w-4 h-4" />
               <span>{lang === 'bn' ? 'ওয়েবসাইট কাস্টমাইজ' : 'Customize Website'}</span>
             </button>
 
+            {/* Back to Website (Without destroying login session) */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-[#0B5D3B] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-2xs"
+                title={lang === 'bn' ? 'ওয়েবসাইটে ফিরে যান (লগইন সংরক্ষিত থাকবে)' : 'Back to Store (Login saved)'}
+              >
+                <Store className="w-4 h-4 text-[#0B5D3B]" />
+                <span className="hidden sm:inline">{lang === 'bn' ? 'ওয়েবসাইটে ফিরে যান' : 'Back to Store'}</span>
+                <span className="sm:hidden">{lang === 'bn' ? 'ওয়েবসাইট' : 'Store'}</span>
+              </button>
+            )}
+
             {/* Logout */}
             <button
-              onClick={onLogout}
-              className="p-2 text-stone-500 hover:text-red-600 hover:bg-stone-100 rounded-xl transition-colors"
+              onClick={() => {
+                if (confirm(lang === 'bn' ? 'আপনি কি নিশ্চিত যে এডমিন থেকে লগআউট করতে চান?' : 'Are you sure you want to log out?')) {
+                  onLogout();
+                }
+              }}
+              className="p-2 text-stone-500 hover:text-red-600 hover:bg-stone-100 rounded-xl transition-colors cursor-pointer"
               title="Logout"
             >
               <LogOut className="w-5 h-5" />
@@ -1997,6 +2076,110 @@ export function AdminDashboard({
                   placeholder="2WW3+FG7 Benapole"
                   className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50 font-mono"
                 />
+              </div>
+            </div>
+
+            {/* WEEKLY OPERATING SCHEDULE & OPEN/CLOSED DAYS */}
+            <div className="bg-stone-50/80 p-5 rounded-2xl border-2 border-stone-200/90 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-200 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#0B5D3B] text-white flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-[#F4D05F]" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm sm:text-base text-stone-900 leading-tight">
+                      সাপ্তাহিক সময়সূচি ও বন্ধের দিন (Weekly Schedule)
+                    </h4>
+                    <p className="text-[11px] text-stone-500 font-medium">
+                      সপ্তাহের বার অনুযায়ী অন/অফ করুন ও খোলা-বন্ধের সময় নির্ধারণ করুন (অটো সেভ হয়)
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full self-start sm:self-auto">
+                  সরাসরি কার্যকর (Auto-Updates)
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {(settingsState.weeklySchedule && settingsState.weeklySchedule.length > 0
+                  ? settingsState.weeklySchedule
+                  : defaultWeeklySchedule
+                ).map((dayItem) => (
+                  <div
+                    key={dayItem.day}
+                    className={`p-3.5 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      dayItem.isOpen
+                        ? 'bg-white border-emerald-300 shadow-2xs'
+                        : 'bg-stone-100/90 border-stone-200 opacity-80'
+                    }`}
+                  >
+                    {/* Day Name and Toggle Switch */}
+                    <div className="flex items-center justify-between sm:justify-start gap-3 min-w-[170px]">
+                      <div>
+                        <span className="font-black text-sm text-stone-900 block leading-tight">
+                          {dayItem.dayNameBn}
+                        </span>
+                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                          {dayItem.dayNameEn}
+                        </span>
+                      </div>
+
+                      {/* ON/OFF Switch Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleDayOpen(dayItem.day)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                          dayItem.isOpen
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                            : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
+                        }`}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            dayItem.isOpen ? 'bg-emerald-200 animate-pulse' : 'bg-red-200'
+                          }`}
+                        />
+                        <span>{dayItem.isOpen ? 'খোলা (ON)' : 'বন্ধ (OFF)'}</span>
+                      </button>
+                    </div>
+
+                    {/* Time Controls: ONLY SHOWN IF DAY IS OPEN (HIDES IF OFF AS REQUESTED) */}
+                    {dayItem.isOpen ? (
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs bg-emerald-50/60 p-2 sm:px-3 rounded-xl border border-emerald-200">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-stone-700 text-[11px]">শুরু:</span>
+                          <input
+                            type="time"
+                            value={dayItem.openTime || '10:00'}
+                            onChange={(e) => handleDayTimeChange(dayItem.day, 'openTime', e.target.value)}
+                            className="bg-white px-2 py-1 rounded-lg border border-stone-300 font-mono font-bold text-stone-900 focus:border-[#0B5D3B] outline-hidden"
+                          />
+                        </div>
+
+                        <span className="text-stone-400 font-black">থেকে</span>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-stone-700 text-[11px]">শেষ:</span>
+                          <input
+                            type="time"
+                            value={dayItem.closeTime || '23:00'}
+                            onChange={(e) => handleDayTimeChange(dayItem.day, 'closeTime', e.target.value)}
+                            className="bg-white px-2 py-1 rounded-lg border border-stone-300 font-mono font-bold text-stone-900 focus:border-[#0B5D3B] outline-hidden"
+                          />
+                        </div>
+
+                        <span className="text-[11px] font-bold text-emerald-800 ml-auto bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                          {formatTime12h(dayItem.openTime)} - {formatTime12h(dayItem.closeTime)}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="text-xs font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-xl border border-red-200 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                        <span>এই বার পুরো দিন বন্ধ থাকবে (সাপ্তাহিক ছুটি)</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 

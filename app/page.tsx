@@ -37,6 +37,8 @@ function RestaurantApp() {
     isCartOpen,
     setIsCartOpen,
     isCheckoutOpen,
+    isTrackingOpen,
+    setIsTrackingOpen,
     selectedFoodForModal,
   } = useApp();
 
@@ -47,7 +49,6 @@ function RestaurantApp() {
 
   // Order success & tracking state
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
-  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
   const [trackingTargetId, setTrackingTargetId] = useState<string | null>(null);
   const [trackingTargetToken, setTrackingTargetToken] = useState<string | null>(null);
 
@@ -98,7 +99,7 @@ function RestaurantApp() {
     setCompletedOrder(null);
     setTrackingTargetId(orderId);
     setTrackingTargetToken(token);
-    setTrackingModalOpen(true);
+    setIsTrackingOpen(true);
   };
 
   return (
@@ -115,7 +116,7 @@ function RestaurantApp() {
         onOrdersClick={() => {
           setTrackingTargetId(null);
           setTrackingTargetToken(null);
-          setTrackingModalOpen(true);
+          setIsTrackingOpen(true);
         }}
       />
 
@@ -128,7 +129,7 @@ function RestaurantApp() {
         onTrackOrderClick={() => {
           setTrackingTargetId(null);
           setTrackingTargetToken(null);
-          setTrackingModalOpen(true);
+          setIsTrackingOpen(true);
         }}
       />
 
@@ -222,7 +223,7 @@ function RestaurantApp() {
         onOpenTrack={() => {
           setTrackingTargetId(null);
           setTrackingTargetToken(null);
-          setTrackingModalOpen(true);
+          setIsTrackingOpen(true);
         }}
       />
 
@@ -315,8 +316,8 @@ function RestaurantApp() {
       )}
 
       <TrackOrderModal
-        isOpen={trackingModalOpen}
-        onClose={() => setTrackingModalOpen(false)}
+        isOpen={isTrackingOpen}
+        onClose={() => setIsTrackingOpen(false)}
         initialOrderId={trackingTargetId}
         initialToken={trackingTargetToken}
       />
@@ -335,6 +336,7 @@ function RestaurantApp() {
         <div className="fixed inset-0 z-50 bg-stone-100 overflow-y-auto">
           <AdminDashboard
             onOpenCustomizer={() => setIsCustomizerOpen(true)}
+            onClose={() => setIsAdminOpen(false)}
             onLogout={() => {
               if (typeof window !== 'undefined') {
                 localStorage.removeItem('bs_admin_remember_me');

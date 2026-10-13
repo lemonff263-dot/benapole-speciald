@@ -267,7 +267,7 @@ export function DeliveryLocationPicker({
       deliveryFee: area.fee !== undefined ? area.fee : value.deliveryFee,
       coordinates: { lat, lng },
       googleMapsUrl,
-      address: value.address ? value.address : `${mainLandmark} এর কাছে`,
+      address: value.address || '',
     });
 
     setGpsMessage({
@@ -457,53 +457,20 @@ export function DeliveryLocationPicker({
         </div>
       )}
 
-      {/* QUICK 1-TAP POPULAR LANDMARK CHIPS */}
-      <div className="space-y-2">
+      {/* PROFESSIONAL AREA SELECTOR & POPULAR LANDMARKS */}
+      <div className="bg-gradient-to-br from-stone-50 to-emerald-50/40 p-3.5 sm:p-4 rounded-2xl border border-stone-200/90 space-y-3 shadow-2xs">
         <div className="flex items-center justify-between">
-          <label className="text-xs sm:text-sm font-bold text-stone-800 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-[#F7931E]" />
-            <span>{lang === 'bn' ? '১-ক্লিকে জনপ্রিয় ল্যান্ডমার্ক সিলেক্ট করুন:' : '1-Tap Famous Landmarks:'}</span>
+          <label className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1.5">
+            <Building className="w-4 h-4 text-[#0B5D3B]" />
+            <span>{lang === 'bn' ? 'ডেলিভারি এরিয়া ও লোকেশন *' : 'Delivery Area & Location *'}</span>
           </label>
-          <span className="text-xs text-stone-500 font-medium">{deliveryAreas.length}টি এলাকা</span>
+          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+            {lang === 'bn' ? 'বেনাপোল কভারেজ' : 'Benapole Coverage'}
+          </span>
         </div>
 
-        <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 bg-stone-50/80 rounded-2xl border border-stone-200">
-          {deliveryAreas.map((area) => {
-            const isSelected = value.area === area.name.bn || value.landmark === area.landmark;
-            return (
-              <button
-                key={area.id}
-                type="button"
-                onClick={() => handleSelectLandmark(area)}
-                className={`text-xs sm:text-sm px-3 py-2 rounded-xl border transition-all text-left flex items-center gap-2 cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#0B5D3B] text-white border-[#0B5D3B] shadow-sm font-extrabold ring-2 ring-emerald-300'
-                    : 'bg-white text-stone-800 border-stone-200 hover:border-[#0B5D3B]/40 hover:bg-stone-50 font-medium'
-                }`}
-              >
-                <Building className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                <span>{area.name.bn}</span>
-                {area.fee !== undefined && (
-                  <span
-                    className={`text-[11px] px-2 py-0.5 rounded-lg font-mono font-bold ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-emerald-50 text-[#0B5D3B]'
-                    }`}
-                  >
-                    ৳{area.fee}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* AREA DROPDOWN SELECTOR & LANDMARK INPUT */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        <div>
-          <label className="text-xs sm:text-sm font-bold text-stone-800 block mb-1.5">
-            {lang === 'bn' ? 'ডেলিভারি এরিয়া / এলাকা *' : 'Delivery Area *'}
-          </label>
+        {/* Clean Styled Select */}
+        <div className="relative">
           <select
             value={value.area}
             onChange={(e) => {
@@ -516,26 +483,55 @@ export function DeliveryLocationPicker({
                 onChange({ ...value, area: e.target.value });
               }
             }}
-            className="w-full text-sm sm:text-base p-3.5 rounded-2xl border-2 border-stone-200 bg-white font-semibold text-stone-900 focus:border-[#0B5D3B] outline-hidden shadow-2xs transition-colors"
+            className="w-full text-xs sm:text-sm p-3 pr-8 rounded-xl border-2 border-stone-200 bg-white font-bold text-stone-900 focus:border-[#0B5D3B] outline-hidden shadow-2xs transition-colors"
           >
             {deliveryAreas.map((a) => (
               <option key={a.id} value={a.name.bn}>
-                {a.name.bn} (ডেলিভারি চার্জ: ৳{a.fee !== undefined ? a.fee : 40})
+                {a.name.bn} (ডেলিভারি: ৳{a.fee !== undefined ? a.fee : 40})
               </option>
             ))}
           </select>
         </div>
 
+        {/* Quick 1-Tap Landmark Pills */}
         <div>
-          <label className="text-xs sm:text-sm font-bold text-stone-800 block mb-1.5">
-            {lang === 'bn' ? 'পরিচিত স্থান / ল্যান্ডমার্ক' : 'Nearby Landmark'}
+          <span className="text-[11px] font-bold text-stone-600 block mb-1.5">
+            {lang === 'bn' ? 'দ্রুত ল্যান্ডমার্ক সিলেক্ট করুন (ঐচ্ছিক):' : 'Popular Landmarks (Optional):'}
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {deliveryAreas.slice(0, 5).map((area) => {
+              const landmarkName = area.landmark ? area.landmark.split(',')[0].trim() : area.name.bn;
+              const isSelected = value.area === area.name.bn;
+              return (
+                <button
+                  key={area.id}
+                  type="button"
+                  onClick={() => handleSelectLandmark(area)}
+                  className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
+                    isSelected
+                      ? 'bg-[#0B5D3B] text-white border-[#0B5D3B] font-bold shadow-2xs'
+                      : 'bg-white text-stone-700 border-stone-200 hover:border-emerald-300 font-medium'
+                  }`}
+                >
+                  <MapPin className="w-3 h-3 shrink-0" />
+                  <span>{landmarkName}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Custom Landmark Input */}
+        <div>
+          <label className="text-xs font-bold text-stone-700 block mb-1">
+            {lang === 'bn' ? 'পরিচিত স্থান / ল্যান্ডমার্ক (ঐচ্ছিক)' : 'Nearby Landmark (Optional)'}
           </label>
           <input
             type="text"
             value={value.landmark}
             onChange={(e) => onChange({ ...value, landmark: e.target.value })}
-            placeholder={lang === 'bn' ? 'যেমন: চেকপোস্ট গেট, পৌরসভা মোড়...' : 'e.g. Near Customs Gate'}
-            className="w-full text-sm sm:text-base p-3.5 rounded-2xl border-2 border-stone-200 bg-stone-50/50 text-stone-900 focus:border-[#0B5D3B] outline-hidden shadow-2xs font-medium transition-colors"
+            placeholder={lang === 'bn' ? 'যেমন: চেকপোস্ট গেট, পৌরসভা মোড়, বা বাজারের কাছে...' : 'e.g. Near Customs Gate'}
+            className="w-full text-xs sm:text-sm p-3 rounded-xl border border-stone-200 bg-white text-stone-900 focus:border-[#0B5D3B] outline-hidden shadow-2xs font-medium transition-colors"
           />
         </div>
       </div>

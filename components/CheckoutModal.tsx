@@ -49,7 +49,7 @@ export function CheckoutModal({
   const initialArea = activeAreas[0];
   const [locationPicker, setLocationPicker] = useState<LocationPickerValue>({
     area: initialArea?.name?.bn || 'বেনাপোল পৌরসভা / শহর এলাকা',
-    landmark: initialArea?.landmark ? initialArea.landmark.split(',')[0].trim() : 'পৌরসভা চত্বর',
+    landmark: '',
     address: '',
     coordinates: initialArea?.coordinates || { lat: 23.046345, lng: 88.903870 },
     googleMapsUrl: initialArea?.coordinates

@@ -271,6 +271,16 @@ export const defaultOffers: Offer[] = [
   },
 ];
 
+export const defaultWeeklySchedule = [
+  { day: 'saturday' as const, dayNameBn: 'শনিবার', dayNameEn: 'Saturday', isOpen: true, openTime: '10:00', closeTime: '23:00' },
+  { day: 'sunday' as const, dayNameBn: 'রবিবার', dayNameEn: 'Sunday', isOpen: true, openTime: '10:00', closeTime: '23:00' },
+  { day: 'monday' as const, dayNameBn: 'সোমবার', dayNameEn: 'Monday', isOpen: true, openTime: '10:00', closeTime: '23:00' },
+  { day: 'tuesday' as const, dayNameBn: 'মঙ্গলবার', dayNameEn: 'Tuesday', isOpen: true, openTime: '10:00', closeTime: '23:00' },
+  { day: 'wednesday' as const, dayNameBn: 'বুধবার', dayNameEn: 'Wednesday', isOpen: true, openTime: '10:00', closeTime: '23:00' },
+  { day: 'thursday' as const, dayNameBn: 'বৃহস্পতিবার', dayNameEn: 'Thursday', isOpen: true, openTime: '10:00', closeTime: '23:00' },
+  { day: 'friday' as const, dayNameBn: 'শুক্রবার', dayNameEn: 'Friday', isOpen: true, openTime: '10:00', closeTime: '23:00' },
+];
+
 export const defaultSettings: RestaurantSettings = {
   restaurantName: {
     bn: 'বেনাপোল স্পেশাল',
@@ -303,6 +313,7 @@ export const defaultSettings: RestaurantSettings = {
   isOrderAccepting: true,
   openingTime: '10:00',
   closingTime: '23:00',
+  weeklySchedule: defaultWeeklySchedule,
   deliveryAreas: [
     {
       id: 'area_benapole_city',

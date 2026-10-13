@@ -77,6 +77,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // SPAM PREVENTION: Max 2 active running orders per phone number at any time
+    const activeRunningOrders = (store.orders || []).filter((o) => {
+      const oClean = o.customerPhone.replace(/\D/g, '');
+      const isSamePhone =
+        oClean.length >= 10 &&
+        cleanPhone.length >= 10 &&
+        (oClean.endsWith(cleanPhone.slice(-10)) || cleanPhone.endsWith(oClean.slice(-10)));
+      const isRunning = ['received', 'confirmed', 'preparing', 'ready_or_out'].includes(o.status);
+      return isSamePhone && isRunning;
+    });
+
+    if (activeRunningOrders.length >= 2) {
+      return NextResponse.json(
+        {
+          error: 'স্প্যাম প্রতিরোধ: আপনার এই ফোন নম্বর থেকে ইতিমধ্যে ২টি রানিং অর্ডার প্রক্রিয়াধীন রয়েছে। পূর্ববর্তী যেকোনো একটি অর্ডার ডেলিভারি সম্পন্ন হলে নতুন অর্ডার করতে পারবেন।',
+          activeOrdersCount: activeRunningOrders.length,
+          activeOrderIds: activeRunningOrders.map((o) => o.id),
+        },
+        { status: 429 }
+      );
+    }
+
     const foodMap = new Map(store.foods.map((f) => [f.id, f]));
 
     // Calculate server-side prices strictly from database

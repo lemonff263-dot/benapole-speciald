@@ -35,6 +35,8 @@ interface AppContextType {
   setIsCartOpen: (open: boolean) => void;
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
+  isTrackingOpen: boolean;
+  setIsTrackingOpen: (open: boolean) => void;
   activeTrackingId: string | null;
   setActiveTrackingId: (id: string | null) => void;
   activeTrackingToken: string | null;
@@ -61,6 +63,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isTrackingOpen, setIsTrackingOpen] = useState(false);
   const [activeTrackingId, setActiveTrackingId] = useState<string | null>(null);
   const [activeTrackingToken, setActiveTrackingToken] = useState<string | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -211,6 +214,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsCartOpen,
         isCheckoutOpen,
         setIsCheckoutOpen,
+        isTrackingOpen,
+        setIsTrackingOpen,
         activeTrackingId,
         setActiveTrackingId,
         activeTrackingToken,
