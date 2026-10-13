@@ -1,0 +1,6 @@
+{
+  "name": "Benapole Special - Restaurant Ordering & Customizer",
+  "description": "Mobile-first ordering platform and visual website customizer for Benapole Special restaurant in Bangladesh with bilingual Bengali/English support, live order tracking, and full admin suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

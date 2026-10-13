@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all unknown collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidOrder(data) {
+      return data is map &&
+        data.id is string && data.id.size() <= 64 &&
+        data.customerName is string && data.customerName.size() <= 150 &&
+        data.customerPhone is string && data.customerPhone.size() <= 30 &&
+        data.orderMode in ['delivery', 'pickup'] &&
+        data.total is number && data.total >= 0 &&
+        data.status in ['received', 'confirmed', 'preparing', 'ready_or_out', 'completed', 'cancelled'] &&
+        data.createdAt is string && data.createdAt.size() <= 40;
+    }
+
+    function isValidMenuConfig(data) {
+      return data is map &&
+        data.updatedAt is string && data.updatedAt.size() <= 40;
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      // Individual customer can get their order if matching orderId
+      allow get: if isValidId(orderId);
+      // List all orders (e.g., admin management or sync)
+      allow list: if true;
+      // Allow customer or server API to create valid order
+      allow create: if isValidId(orderId) && isValidOrder(incoming());
+      // Allow updating order status or payment verification
+      allow update: if isValidId(orderId) && isValidOrder(incoming());
+      // Admin delete
+      allow delete: if isValidId(orderId);
+    }
+
+    // Public / Config Collection (Menu & Settings)
+    match /config/{docId} {
+      allow read: if isValidId(docId);
+      allow write: if isValidId(docId) && isValidMenuConfig(incoming());
+    }
+  }
+}

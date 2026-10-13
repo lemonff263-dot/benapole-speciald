@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "order": {
+      "title": "Order",
+      "description": "Customer food order with items, customer details, delivery location, payment, and status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique Order ID (e.g. BS-261012-1234)" },
+        "trackingToken": { "type": "string", "description": "Verification token for guest order tracking" },
+        "customerName": { "type": "string", "description": "Customer full name" },
+        "customerPhone": { "type": "string", "description": "Customer contact mobile phone number" },
+        "orderMode": { "type": "string", "enum": ["delivery", "pickup"], "description": "Order fulfillment mode" },
+        "address": { "type": "string", "description": "Delivery street address or location details" },
+        "area": { "type": "string", "description": "Selected Benapole area / union" },
+        "landmark": { "type": "string", "description": "Nearby landmark or specific direction" },
+        "pickupTime": { "type": "string", "description": "Estimated pickup time if order mode is pickup" },
+        "instructions": { "type": "string", "description": "Special cooking or delivery instructions" },
+        "items": { "type": "array", "description": "List of ordered food item snapshots" },
+        "subtotal": { "type": "number", "description": "Order items subtotal in BDT" },
+        "deliveryFee": { "type": "number", "description": "Delivery charge in BDT" },
+        "discount": { "type": "number", "description": "Applied discount amount in BDT" },
+        "couponCode": { "type": "string", "description": "Discount coupon code applied" },
+        "total": { "type": "number", "description": "Final payable amount in BDT" },
+        "paymentMethod": { "type": "string", "enum": ["cod", "pickup_cash", "bkash", "nagad", "rocket"], "description": "Chosen payment method" },
+        "paymentStatus": { "type": "string", "enum": ["unpaid", "pending_verification", "verified"], "description": "Payment verification status" },
+        "transactionId": { "type": "string", "description": "Mobile banking transaction ID if prepaid" },
+        "status": { "type": "string", "enum": ["received", "confirmed", "preparing", "ready_or_out", "completed", "cancelled"], "description": "Current order lifecycle status" },
+        "statusHistory": { "type": "array", "description": "Audit trail of order lifecycle status updates" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of order creation" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of last update" }
+      },
+      "required": ["id", "customerName", "customerPhone", "orderMode", "items", "total", "status", "createdAt"]
+    },
+    "menuConfig": {
+      "title": "MenuConfig",
+      "description": "Live restaurant foods, categories, promo offers, settings, and visual theme configuration",
+      "type": "object",
+      "properties": {
+        "categories": { "type": "array", "description": "Food menu categories" },
+        "foods": { "type": "array", "description": "Restaurant menu food items" },
+        "offers": { "type": "array", "description": "Promotional offers and voucher discounts" },
+        "settings": { "type": "object", "description": "Restaurant operating settings, delivery fee, and contacts" },
+        "theme": { "type": "object", "description": "Visual branding colors, banner text, and typography" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of last configuration update" }
+      },
+      "required": ["updatedAt"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/order" },
+      "description": "Individual customer order documents stored for real-time tracking and admin dispatch"
+    },
+    "/config/menu": {
+      "schema": { "$ref": "#/entities/menuConfig" },
+      "description": "Singleton configuration document holding live synchronized menu and restaurant settings"
+    }
+  }
+}
