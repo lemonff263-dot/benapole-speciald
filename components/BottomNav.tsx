@@ -9,10 +9,12 @@ export function BottomNav({
   activeTab,
   setActiveTab,
   onOpenTrack,
+  onOpenHelp,
 }: {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenTrack: () => void;
+  onOpenHelp?: () => void;
 }) {
   const {
     lang,
@@ -148,8 +150,18 @@ export function BottomNav({
 
         {/* Contact / Help */}
         <button
-          onClick={() => navigateTo('help', 'about-section')}
-          className="flex flex-col items-center justify-center min-h-[50px] py-1 text-stone-600 hover:text-[#0B5D3B] transition-all cursor-pointer font-semibold"
+          onClick={() => {
+            closeAllOverlays();
+            setActiveTab('help');
+            if (onOpenHelp) {
+              onOpenHelp();
+            } else {
+              navigateTo('help', 'about-section');
+            }
+          }}
+          className={`flex flex-col items-center justify-center min-h-[50px] py-1 transition-all cursor-pointer ${
+            activeTab === 'help' ? 'text-[#0B5D3B] font-extrabold scale-105' : 'text-stone-600 hover:text-[#0B5D3B] font-semibold'
+          }`}
         >
           <PhoneCall className="w-5 h-5 mb-0.5" />
           <span className="text-xs leading-none">

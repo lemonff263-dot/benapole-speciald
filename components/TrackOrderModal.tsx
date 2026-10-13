@@ -274,30 +274,31 @@ function TrackOrderContent({
 
   return (
     <div
-      className="w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-200 border border-stone-200"
+      className="w-full max-w-xl bg-white sm:rounded-3xl shadow-2xl overflow-hidden h-[100dvh] sm:h-auto sm:max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-200 border border-stone-200"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50/90 shrink-0">
+      <div className="px-4 sm:px-5 py-3.5 border-b border-stone-200 flex items-center justify-between bg-stone-50/95 sticky top-0 z-20 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-[#0B5D3B] text-white flex items-center justify-center shadow-xs">
             <Receipt className="w-5 h-5 text-[#F4D05F]" />
           </div>
           <div>
-            <h2 className="font-black text-base sm:text-lg text-stone-900 leading-tight">
+            <h2 className="font-black text-sm sm:text-lg text-stone-900 leading-tight">
               {lang === 'bn' ? 'আমার অর্ডার ও লাইভ ট্র্যাকিং' : 'My Orders & Live Tracking'}
             </h2>
-            <p className="text-xs text-stone-600 font-medium">
+            <p className="text-[11px] sm:text-xs text-stone-600 font-medium">
               {lang === 'bn' ? 'অর্ডারের রিয়েলটাইম অবস্থা ও হিস্ট্রি দেখুন' : 'View order progress and past orders'}
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-2 rounded-xl hover:bg-stone-200 text-stone-500 transition-colors cursor-pointer"
+          className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 transition-colors cursor-pointer flex items-center gap-1 font-extrabold text-xs"
           aria-label="Close"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 text-stone-700" />
+          <span className="hidden sm:inline">{lang === 'bn' ? 'বন্ধ করুন' : 'Close'}</span>
         </button>
       </div>
 
@@ -756,7 +757,7 @@ export function TrackOrderModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 pb-20 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-[120] flex items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200"
     >
       <TrackOrderContent
         key={`${initialOrderId || 'manual'}-${initialToken || 'none'}`}

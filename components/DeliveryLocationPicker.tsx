@@ -128,21 +128,21 @@ export function DeliveryLocationPicker({
     });
 
     const googleMapsUrl = `https://www.google.com/maps?q=${newLat},${newLng}`;
-    const detectedLandmark = closestArea?.landmark ? closestArea.landmark.split(',')[0].trim() : 'চিহ্নিত স্থান';
+    const detectedLandmark = closestArea?.landmark ? closestArea.landmark.split(',')[0].trim() : 'বেনাপোল';
 
     onChange({
       ...value,
       coordinates: { lat: newLat, lng: newLng },
       googleMapsUrl,
-      area: closestArea ? (closestArea.name.bn || closestArea.name.en) : value.area,
+      area: closestArea ? (closestArea.name.bn || closestArea.name.en) : (value.area || 'বেনাপোল পৌরসভা ও বাজার এলাকা'),
       deliveryFee: closestArea?.fee !== undefined ? closestArea.fee : value.deliveryFee,
-      landmark: detectedLandmark,
-      address: value.address || `${detectedLandmark} সংলগ্ন`,
+      landmark: value.landmark || '',
+      address: value.address || '',
     });
 
     setGpsMessage({
       type: 'success',
-      text: lang === 'bn' ? `📍 ম্যাপে লোকেশন চিহ্নিত হয়েছে: ${closestArea?.name?.bn || 'বেনাপোল'}` : `📍 Location pinned: ${closestArea?.name?.en || 'Benapole'}`,
+      text: lang === 'bn' ? `📍 ম্যাপে লোকেশন চিহ্নিত হয়েছে (${closestArea?.name?.bn || 'বেনাপোল'})` : `📍 Location pinned (${closestArea?.name?.en || 'Benapole'})`,
     });
     setTimeout(() => setGpsMessage(null), 3500);
   };
@@ -151,7 +151,7 @@ export function DeliveryLocationPicker({
   const handleGetLiveLocation = () => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
       // Fallback to nearest area
-      const fallbackArea = deliveryAreas[0] || { name: { bn: 'বেনাপোল পৌরসভা' }, fee: 40 };
+      const fallbackArea = deliveryAreas[0] || { name: { bn: 'বেনাপোল পৌরসভা ও বাজার এলাকা' }, fee: 40 };
       onChange({
         ...value,
         coordinates: BENAPOLE_CENTER,
@@ -161,8 +161,8 @@ export function DeliveryLocationPicker({
       setGpsMessage({
         type: 'info',
         text: lang === 'bn'
-          ? 'ব্রাউজারে জিপিএস পাওয়া যায়নি। বেনাপোল প্রধান কেন্দ্র সেট করা হয়েছে, নিচে পরিবর্তন করতে পারেন।'
-          : 'GPS not found. Set to Benapole center, you can adjust below.',
+          ? 'ব্রাউজারে জিপিএস পাওয়া যায়নি। বেনাপোল প্রধান কেন্দ্র সেট করা হয়েছে।'
+          : 'GPS not found. Set to Benapole center.',
       });
       return;
     }
@@ -189,18 +189,15 @@ export function DeliveryLocationPicker({
       });
 
       const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-      const mainLandmark = matchedArea?.landmark ? matchedArea.landmark.split(',')[0].trim() : 'বর্তমান অবস্থান';
 
       onChange({
         ...value,
         coordinates: { lat, lng },
         googleMapsUrl,
-        area: matchedArea ? matchedArea.name.bn : value.area,
+        area: matchedArea ? matchedArea.name.bn : (value.area || 'বেনাপোল পৌরসভা ও বাজার এলাকা'),
         deliveryFee: matchedArea?.fee !== undefined ? matchedArea.fee : value.deliveryFee,
-        landmark: mainLandmark,
-        address:
-          value.address ||
-          (lang === 'bn' ? `${matchedArea.name.bn} (${mainLandmark} সংলগ্ন)` : `Near ${matchedArea.name.en}`),
+        landmark: value.landmark || '',
+        address: value.address || '',
       });
 
       setGpsMessage({
@@ -462,17 +459,23 @@ export function DeliveryLocationPicker({
         <div className="flex items-center justify-between">
           <label className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1.5">
             <Building className="w-4 h-4 text-[#0B5D3B]" />
-            <span>{lang === 'bn' ? 'ডেলিভারি এরিয়া ও লোকেশন *' : 'Delivery Area & Location *'}</span>
+            <span>{lang === 'bn' ? 'ডেলিভারি এরিয়া (বেনাপোল) *' : 'Delivery Area (Benapole) *'}</span>
           </label>
-          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
-            {lang === 'bn' ? 'বেনাপোল কভারেজ' : 'Benapole Coverage'}
+          <span className="text-[11px] font-black text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-300">
+            {lang === 'bn' ? '✓ কেবল বেনাপোলে সক্রিয়' : 'Benapole Only'}
           </span>
         </div>
+
+        <p className="text-[11px] text-stone-600 font-medium">
+          {lang === 'bn'
+            ? 'ডিফল্ট হিসেবে "বেনাপোল" সিলেক্ট করা আছে। আপনি পরিবর্তন না করলেও পিন করা লোকেশন দেখে রাইডার আপনার কাছে পৌঁছে যাবে।'
+            : 'Default set to "Benapole". Your pinned location will guide the rider directly to you.'}
+        </p>
 
         {/* Clean Styled Select */}
         <div className="relative">
           <select
-            value={value.area}
+            value={value.area || 'বেনাপোল পৌরসভা / শহর এলাকা'}
             onChange={(e) => {
               const selectedArea = deliveryAreas.find(
                 (a) => a.name.bn === e.target.value || a.name.en === e.target.value
@@ -483,11 +486,11 @@ export function DeliveryLocationPicker({
                 onChange({ ...value, area: e.target.value });
               }
             }}
-            className="w-full text-xs sm:text-sm p-3 pr-8 rounded-xl border-2 border-stone-200 bg-white font-bold text-stone-900 focus:border-[#0B5D3B] outline-hidden shadow-2xs transition-colors"
+            className="w-full text-xs sm:text-sm p-3 pr-8 rounded-xl border-2 border-stone-200 bg-white font-black text-stone-900 focus:border-[#0B5D3B] outline-hidden shadow-2xs transition-colors"
           >
             {deliveryAreas.map((a) => (
               <option key={a.id} value={a.name.bn}>
-                {a.name.bn} (ডেলিভারি: ৳{a.fee !== undefined ? a.fee : 40})
+                📍 {a.name.bn} (ডেলিভারি ফি: ৳{a.fee !== undefined ? a.fee : 40})
               </option>
             ))}
           </select>

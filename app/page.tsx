@@ -14,6 +14,9 @@ import { TrackOrderModal } from '@/components/TrackOrderModal';
 import { OffersSection } from '@/components/OffersSection';
 import { AboutAndContact } from '@/components/AboutAndContact';
 import { BottomNav } from '@/components/BottomNav';
+import { CustomerReviews } from '@/components/CustomerReviews';
+import { HelpSupportModal } from '@/components/HelpSupportModal';
+import { WelcomeEntranceModal } from '@/components/WelcomeEntranceModal';
 import { AdminLoginModal } from '@/components/admin/AdminLoginModal';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { VisualWebsiteCustomizer } from '@/components/admin/VisualWebsiteCustomizer';
@@ -54,20 +57,18 @@ function RestaurantApp() {
 
   // Admin authentication state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   // Auto-login admin if remembered on device
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        const isRemembered = localStorage.getItem('bs_admin_remember_me') === 'true';
-        const token = localStorage.getItem('bs_admin_token');
-        if (isRemembered && token) {
-          setIsAdminAuthenticated(true);
-        }
+    if (typeof window !== 'undefined') {
+      const isRemembered = localStorage.getItem('bs_admin_remember_me') === 'true';
+      const token = localStorage.getItem('bs_admin_token');
+      if (isRemembered && token) {
+        setIsAdminAuthenticated(true);
       }
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [isAdminOpen]);
 
   // Filter foods by selected category
   const filteredFoods = useMemo(() => {
@@ -187,6 +188,9 @@ function RestaurantApp() {
       {/* 5. Offers Section */}
       <OffersSection />
 
+      {/* 5.5 Customer Reviews & Ratings Section (Verified Feedback) */}
+      <CustomerReviews />
+
       {/* 6. About Us, Interior, Location & Contact */}
       <AboutAndContact />
 
@@ -225,6 +229,7 @@ function RestaurantApp() {
           setTrackingTargetToken(null);
           setIsTrackingOpen(true);
         }}
+        onOpenHelp={() => setIsHelpModalOpen(true)}
       />
 
       {/* Search Overlay Modal */}
@@ -321,6 +326,19 @@ function RestaurantApp() {
         initialOrderId={trackingTargetId}
         initialToken={trackingTargetToken}
       />
+
+      {/* Dedicated Help & Customer Support Modal */}
+      <HelpSupportModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        onOpenTrack={() => {
+          setIsHelpModalOpen(false);
+          setIsTrackingOpen(true);
+        }}
+      />
+
+      {/* Eye-Catching Welcome Entrance Modal */}
+      <WelcomeEntranceModal />
 
       {/* Admin Login Modal */}
       <AdminLoginModal

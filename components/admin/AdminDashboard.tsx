@@ -34,6 +34,8 @@ import {
   HelpCircle,
   CheckCheck,
   Building,
+  KeyRound,
+  Lock,
 } from 'lucide-react';
 import { Order, FoodItem, Category, Offer, RestaurantSettings, DeliveryArea } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
@@ -129,6 +131,47 @@ export function AdminDashboard({
   const [isSavingTelegram, setIsSavingTelegram] = useState(false);
 
   const [feedbackToast, setFeedbackToast] = useState('');
+
+  // Password change state
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
+  const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
+  const [passwordChangeMessage, setPasswordChangeMessage] = useState('');
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newAdminPassword.length < 4) {
+      setPasswordChangeMessage('পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে');
+      return;
+    }
+    if (newAdminPassword !== confirmAdminPassword) {
+      setPasswordChangeMessage('উভয় পাসওয়ার্ড হুবহু একই হতে হবে');
+      return;
+    }
+    setPasswordChangeLoading(true);
+    setPasswordChangeMessage('');
+    try {
+      const res = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({ newPassword: newAdminPassword }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('✅ পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!');
+        setIsChangePasswordOpen(false);
+        setNewAdminPassword('');
+        setConfirmAdminPassword('');
+      } else {
+        setPasswordChangeMessage(data.error || 'পাসওয়ার্ড পরিবর্তনে ব্যর্থ');
+      }
+    } catch {
+      setPasswordChangeMessage('সার্ভারে যোগাযোগ করা যায়নি');
+    } finally {
+      setPasswordChangeLoading(false);
+    }
+  };
 
   const showToast = (msg: string) => {
     setFeedbackToast(msg);
@@ -909,6 +952,22 @@ export function AdminDashboard({
             >
               <Palette className="w-4 h-4" />
               <span>{lang === 'bn' ? 'ওয়েবসাইট কাস্টমাইজ' : 'Customize Website'}</span>
+            </button>
+
+            {/* Change Password Button */}
+            <button
+              onClick={() => {
+                setPasswordChangeMessage('');
+                setNewAdminPassword('');
+                setConfirmAdminPassword('');
+                setIsChangePasswordOpen(true);
+              }}
+              className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-2xs"
+              title="এডমিন পাসওয়ার্ড পরিবর্তন করুন"
+            >
+              <KeyRound className="w-4 h-4 text-amber-600" />
+              <span className="hidden sm:inline">পাসওয়ার্ড পরিবর্তন</span>
+              <span className="sm:hidden">পাসওয়ার্ড</span>
             </button>
 
             {/* Back to Website (Without destroying login session) */}
@@ -2975,6 +3034,91 @@ export function AdminDashboard({
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Change Modal */}
+      {isChangePasswordOpen && (
+        <div className="fixed inset-0 z-[75] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in">
+          <div
+            className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-stone-200 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <h3 className="font-extrabold text-base text-stone-900">
+                  পাসওয়ার্ড পরিবর্তন
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsChangePasswordOpen(false)}
+                className="p-1 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-3.5">
+              <p className="text-xs text-stone-600 font-medium">
+                পরবর্তী সময়ে এডমিন প্যানেলে লগইন করার জন্য নতুন পাসওয়ার্ড সেট করুন।
+              </p>
+
+              {passwordChangeMessage && (
+                <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-bold">
+                  {passwordChangeMessage}
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs font-bold text-stone-700 block mb-1">
+                  নতুন পাসওয়ার্ড (কমপক্ষে ৪ অক্ষর) *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={newAdminPassword}
+                  onChange={(e) => setNewAdminPassword(e.target.value)}
+                  placeholder="নতুন পাসওয়ার্ড লিখুন"
+                  className="w-full text-sm p-3 rounded-xl border border-stone-300 focus:border-[#0B5D3B] outline-hidden font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-stone-700 block mb-1">
+                  পাসওয়ার্ড নিশ্চিত করুন *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmAdminPassword}
+                  onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                  placeholder="পুনরায় পাসওয়ার্ড লিখুন"
+                  className="w-full text-sm p-3 rounded-xl border border-stone-300 focus:border-[#0B5D3B] outline-hidden font-medium"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsChangePasswordOpen(false)}
+                  className="flex-1 py-2.5 px-4 border border-stone-200 rounded-xl text-stone-600 font-bold text-xs hover:bg-stone-50"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordChangeLoading}
+                  className="flex-1 py-2.5 px-4 bg-[#0B5D3B] hover:bg-[#08482E] text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  {passwordChangeLoading ? 'সেভ হচ্ছে...' : 'সংরক্ষণ করুন'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

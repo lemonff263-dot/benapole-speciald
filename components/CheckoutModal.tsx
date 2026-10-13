@@ -195,14 +195,14 @@ export function CheckoutModal({
   return (
     <div
       onClick={() => setIsCheckoutOpen(false)}
-      className="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 pb-16 sm:p-4 sm:pb-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-[120] flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200"
     >
       <div
-        className="w-full max-w-xl max-h-[90dvh] sm:max-h-[90vh] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300 border border-stone-200"
+        className="w-full max-w-xl h-[100dvh] sm:h-auto sm:max-h-[92vh] bg-white sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300 border border-stone-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50/80 sticky top-0 z-10 shrink-0">
+        <div className="px-4 sm:px-5 py-3.5 border-b border-stone-200 flex items-center justify-between bg-stone-50/95 sticky top-0 z-20 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-[#0B5D3B] text-white flex items-center justify-center shadow-sm">
               <ShoppingBag className="w-5 h-5 text-[#F4D05F]" />

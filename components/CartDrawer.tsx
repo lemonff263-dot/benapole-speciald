@@ -99,10 +99,10 @@ export function CartDrawer() {
   return (
     <div
       onClick={() => setIsCartOpen(false)}
-      className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-[120] flex justify-end bg-black/70 backdrop-blur-xs animate-in fade-in duration-200"
     >
       <div
-        className="w-full max-w-md bg-white h-[calc(100%-4rem)] md:h-full mb-16 md:mb-0 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-stone-200"
+        className="w-full max-w-md bg-white h-[100dvh] md:h-full mb-0 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-stone-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

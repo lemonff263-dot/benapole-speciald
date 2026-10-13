@@ -5,6 +5,7 @@ import {
   Order,
   RestaurantSettings,
   CustomizerTheme,
+  CustomerReview,
 } from './types';
 
 export const defaultCategories: Category[] = [
@@ -656,3 +657,57 @@ export const defaultSeedOrders: Order[] = [
     updatedAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
   },
 ];
+
+export const defaultReviews: CustomerReview[] = [
+  {
+    id: 'rev_1',
+    name: 'তানভীর আহমেদ',
+    location: 'বেনাপোল পৌরসভা',
+    foodName: 'বেনাপোল স্পেশাল দই চিড়া',
+    rating: 5,
+    comment: 'দই চিড়াটা সত্যিই অসাধারণ! দইয়ের গাঢ় মিষ্টি আর বাদাম-বেদানার রাজকীয় কম্বিনেশন বেনাপোলে এর চেয়ে সেরা আর কোথাও পাইনি। অর্ডার করার ২০ মিনিটের মধ্যে পেয়েছি।',
+    date: 'গতকাল',
+    isVerified: true,
+  },
+  {
+    id: 'rev_2',
+    name: 'রাশেদুল ইসলাম',
+    location: 'কাস্টমস মোড় এলাকা',
+    foodName: 'ক্রিস্পি চিকেন নাচোস প্ল্যাটটার',
+    rating: 5,
+    comment: 'অফিসে লাঞ্চের জন্য অর্ডার করেছিলাম। একদম গরম গরম ক্রাঞ্চি নাচোস আর চিজি সস। প্যাকেজিং খুব প্রিমিয়াম ছিল। নিয়মিত অর্ডার করব ইনশাআল্লাহ।',
+    date: '২ দিন আগে',
+    isVerified: true,
+  },
+  {
+    id: 'rev_3',
+    name: 'সায়মা রহমান',
+    location: 'শার্শা বাজার রোড',
+    foodName: 'চিকেন চাউমিন ও কোল্ড কফি',
+    rating: 5,
+    comment: 'খাবারের স্বাদ আর মান দুটোই দারুণ। সব চেয়ে ভালো লেগেছে মোবাইল থেকে কোনো রেজিস্ট্রেশন ছাড়াই সরাসরি অর্ডার দেওয়া যায় এবং লাইভ ট্র্যাক করা যায়।',
+    date: '৩ দিন আগে',
+    isVerified: true,
+  },
+  {
+    id: 'rev_4',
+    name: 'মোঃ আল-আমিন',
+    location: 'বেনাপোল রেলওয়ে স্টেশন',
+    foodName: 'ডাবল চিজ বিফ/চিকেন বার্গার',
+    rating: 5,
+    comment: 'বার্গারের প্যাটিটা খুবই জুসি এবং ফ্রেশ বান। রাইডারের ব্যবহারও চমৎকার। বেনাপোল স্পেশাল সত্যিই বেনাপোলের সেরা ফাস্টফুড!',
+    date: '৪ দিন আগে',
+    isVerified: true,
+  },
+  {
+    id: 'rev_5',
+    name: 'ফারহানা ইয়াসমিন',
+    location: 'মেয়র মার্কেট এলাকা',
+    foodName: 'বেনাপোল স্পেশাল দই চিড়া',
+    rating: 5,
+    comment: 'পরিবারের সবার জন্যই দই চিড়া অর্ডার করেছিলাম, সবাই খুব প্রশংসা করেছে। ১০০% স্বাস্থ্যকর এবং অথেনটিক টেস্ট।',
+    date: '৫ দিন আগে',
+    isVerified: true,
+  },
+];
+

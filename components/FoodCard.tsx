@@ -92,32 +92,38 @@ export function FoodCard({ food }: { food: FoodItem }) {
       </div>
 
       {/* Pricing & Add Button */}
-      <div className="mt-3.5 pt-3 border-t-2 border-stone-100 flex items-center justify-between gap-2">
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-lg sm:text-xl font-black text-[#0B5D3B]">৳{food.price}</span>
-          {food.compareAtPrice && (
-            <span className="text-xs sm:text-sm text-stone-400 line-through font-medium">৳{food.compareAtPrice}</span>
-          )}
+      <div className="mt-3.5 pt-3 border-t-2 border-stone-100 flex items-center justify-between gap-2.5">
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl sm:text-2xl font-black text-[#0B5D3B]">৳{food.price}</span>
+            {food.compareAtPrice && (
+              <span className="text-xs sm:text-sm text-stone-400 line-through font-medium">৳{food.compareAtPrice}</span>
+            )}
+          </div>
+          <span className="text-[10px] text-emerald-800 font-extrabold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>বেনাপোলে দ্রুত ডেলিভারি</span>
+          </span>
         </div>
 
         {inCartQty > 0 && primaryCartItem ? (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center bg-[#0B5D3B] text-white rounded-2xl p-1 shadow-md gap-1 border border-emerald-700 shrink-0 h-11 sm:h-12"
+            className="flex items-center bg-[#0B5D3B] text-white rounded-2xl p-1 shadow-md gap-1 border-2 border-emerald-700 shrink-0 h-12 sm:h-13"
           >
             <button
               onClick={() => updateCartQuantity(primaryCartItem.id, -1)}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-black/20 flex items-center justify-center font-black text-base active:scale-90 transition-all cursor-pointer"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl hover:bg-black/20 flex items-center justify-center font-black text-lg active:scale-90 transition-all cursor-pointer"
               aria-label="কমান"
             >
               −
             </button>
-            <span className="font-mono font-black text-sm sm:text-base px-2 min-w-[24px] text-center text-white">
+            <span className="font-mono font-black text-base sm:text-lg px-2 min-w-[28px] text-center text-white">
               {inCartQty}
             </span>
             <button
               onClick={handleQuickAdd}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-black/20 flex items-center justify-center font-black text-base active:scale-90 transition-all cursor-pointer"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl hover:bg-black/20 flex items-center justify-center font-black text-lg active:scale-90 transition-all cursor-pointer"
               aria-label="বাড়ান"
             >
               +
@@ -126,11 +132,11 @@ export function FoodCard({ food }: { food: FoodItem }) {
         ) : (
           <button
             onClick={handleQuickAdd}
-            className="flex items-center justify-center h-11 sm:h-12 px-4 sm:px-5 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 text-white rounded-2xl font-black text-sm sm:text-base gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer shrink-0"
+            className="flex items-center justify-center h-12 sm:h-13 px-5 sm:px-6 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 text-white rounded-2xl font-black text-sm sm:text-base gap-2 transition-all shadow-lg shadow-emerald-900/25 hover:shadow-xl cursor-pointer shrink-0 border border-emerald-600"
             aria-label={`অর্ডার করুন ${food.name.bn}`}
           >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-[#F4D05F]" />
-            <span>{lang === 'bn' ? 'অর্ডার করুন' : 'Order Now'}</span>
+            <Plus className="w-5 h-5 text-[#F4D05F] stroke-[3]" />
+            <span className="tracking-tight">{lang === 'bn' ? 'অর্ডার করুন' : 'Order Now'}</span>
           </button>
         )}
       </div>

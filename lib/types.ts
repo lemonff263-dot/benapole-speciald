@@ -44,6 +44,17 @@ export interface Category {
   isActive: boolean;
 }
 
+export interface CustomerReview {
+  id: string;
+  name: string;
+  location?: string;
+  foodName?: string;
+  rating: number; // 1 to 5
+  comment: string;
+  date: string;
+  isVerified?: boolean;
+}
+
 export interface Offer {
   id: string;
   code: string;
@@ -135,6 +146,7 @@ export interface RestaurantSettings {
   restaurantName: BilingualText;
   tagline: BilingualText;
   phone: string;
+  whatsapp?: string;
   email: string;
   address: BilingualText;
   mapUrl: string;
