@@ -162,19 +162,50 @@ function RestaurantApp() {
             </h2>
           </div>
           <span className="text-xs sm:text-sm text-stone-600 font-bold bg-stone-100 px-3 py-1.5 rounded-xl border border-stone-200 self-start sm:self-auto">
-            {lang === 'bn'
-              ? `🔥 ${filteredFoods.length}টি সুস্বাদু খাবার তৈরি আছে`
-              : `${filteredFoods.length} delicious items available`}
+            {filteredFoods.length > 0
+              ? lang === 'bn'
+                ? `🔥 ${filteredFoods.length}টি সুস্বাদু খাবার তৈরি আছে`
+                : `${filteredFoods.length} delicious items available`
+              : lang === 'bn'
+              ? '🍽️ মেনু প্রস্তুতি চলছে'
+              : '🍽️ Menu Updating'}
           </span>
         </div>
 
         {/* Food Items Responsive Grid (Mobile-First: 1 col on small phones, 2 on phablet, 3-4 on tablet/desktop) */}
         {filteredFoods.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-3xl border-2 border-stone-200 text-stone-500 space-y-3">
-            <AlertCircle className="w-10 h-10 mx-auto text-stone-400" />
-            <p className="font-extrabold text-base text-stone-700">
-              {lang === 'bn' ? 'এই ক্যাটাগরিতে বর্তমানে কোনো খাবার নেই' : 'No items found in this category'}
-            </p>
+          <div className="p-8 sm:p-14 text-center bg-white rounded-3xl border-2 border-stone-200/90 text-stone-500 space-y-4 max-w-lg mx-auto shadow-2xs">
+            <div className="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 mx-auto flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-amber-500" />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="font-black text-lg text-stone-900">
+                {foods.length === 0
+                  ? lang === 'bn'
+                    ? 'বর্তমানে মেনুতে কোনো খাবার যোগ করা নেই'
+                    : 'No Food Items in Menu Yet'
+                  : lang === 'bn'
+                  ? 'এই ক্যাটাগরিতে বর্তমানে কোনো খাবার নেই'
+                  : 'No items found in this category'}
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
+                {foods.length === 0
+                  ? lang === 'bn'
+                    ? 'খুব শীঘ্রই নতুন ও আকর্ষণীয় খাবার যোগ করা হবে। রেস্তোরাঁ কর্তৃপক্ষ অ্যাডমিন প্যানেল থেকে খাবার যুক্ত বা পরিচালনা করতে পারবেন।'
+                    : 'Delicious new items will be added shortly. You can add items directly from the Admin Panel.'
+                  : lang === 'bn'
+                  ? 'অন্য ক্যাটাগরি বেছে নিন অথবা সকল খাবার দেখতে উপরে "সকল খাবার" চাপুন।'
+                  : 'Please browse other categories or select "All".'}
+              </p>
+            </div>
+            {foods.length === 0 && (
+              <button
+                onClick={() => setIsAdminOpen(true)}
+                className="inline-flex items-center gap-2 bg-[#0B5D3B] hover:bg-[#08482E] text-white px-5 py-2.5 rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+              >
+                <span>{lang === 'bn' ? 'অ্যাডমিন প্যানেল খুলুন' : 'Open Admin Panel'}</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">

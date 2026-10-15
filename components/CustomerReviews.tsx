@@ -19,11 +19,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CustomerReview } from '@/lib/types';
 import { defaultReviews } from '@/lib/constants';
 import { useApp } from '@/context/AppContext';
+import { saveReviewToFirestore } from '@/lib/firestoreService';
 
 export function CustomerReviews() {
   const { lang, t } = useApp();
 
-  const [reviews, setReviews] = useState<CustomerReview[]>(defaultReviews);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'doi_chira' | 'fast_food' | '5_star'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
@@ -36,14 +37,18 @@ export function CustomerReviews() {
   const [newComment, setNewComment] = useState('');
   const [formSuccess, setFormSuccess] = useState(false);
 
-  // Load reviews from localStorage if available
+  // Load reviews from localStorage if available, filtering out any demo reviews
   useEffect(() => {
     try {
       const stored = localStorage.getItem('benapole_customer_reviews');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setReviews([...parsed, ...defaultReviews.filter((d) => !parsed.some((p: any) => p.id === d.id))]);
+        if (Array.isArray(parsed)) {
+          const realReviews = parsed.filter(
+            (p: any) => p && p.id && !p.id.startsWith('rev_1') && !p.id.startsWith('rev_2') && !p.id.startsWith('rev_3') && !p.id.startsWith('rev_4') && !p.id.startsWith('rev_5')
+          );
+          setReviews(realReviews);
+          localStorage.setItem('benapole_customer_reviews', JSON.stringify(realReviews));
         }
       }
     } catch {
@@ -81,6 +86,9 @@ export function CustomerReviews() {
     } catch {
       // ignore
     }
+
+    // Sync to Firestore in background
+    void saveReviewToFirestore(newRev);
 
     setFormSuccess(true);
     setTimeout(() => {
@@ -134,29 +142,67 @@ export function CustomerReviews() {
           </div>
 
           {/* Overall Score & Add Review Action */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border-2 border-stone-200 shadow-2xs">
-              <div className="text-right">
-                <div className="flex items-center gap-1">
-                  <span className="text-2xl font-black text-stone-900">৪.৯</span>
-                  <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
+          {(() => {
+            const avgRatingNumber = reviews.length > 0
+              ? reviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / reviews.length
+              : 0;
+            const avgRatingString = avgRatingNumber > 0 ? avgRatingNumber.toFixed(1) : '0.0';
+            const toBnDigits = (str: string) =>
+              str
+                .replace(/0/g, '০')
+                .replace(/1/g, '১')
+                .replace(/2/g, '২')
+                .replace(/3/g, '৩')
+                .replace(/4/g, '৪')
+                .replace(/5/g, '৫')
+                .replace(/6/g, '৬')
+                .replace(/7/g, '৭')
+                .replace(/8/g, '৮')
+                .replace(/9/g, '৯');
+            const avgRatingDisplay = lang === 'bn' ? toBnDigits(avgRatingString) : avgRatingString;
+            const reviewCountDisplay = lang === 'bn' ? toBnDigits(reviews.length.toString()) : reviews.length.toString();
+
+            return (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border-2 border-stone-200 shadow-2xs">
+                  <div className="text-right">
+                    <div className="flex items-center gap-1">
+                      <span className="text-2xl font-black text-stone-900">{avgRatingDisplay}</span>
+                      <div className="flex text-amber-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${
+                              reviews.length > 0 && i < Math.round(avgRatingNumber)
+                                ? 'fill-amber-400 text-amber-400'
+                                : 'text-stone-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-stone-500">
+                      {reviews.length > 0
+                        ? lang === 'bn'
+                          ? `${reviewCountDisplay}টি আসল রিভিউ`
+                          : `${reviewCountDisplay} Verified Reviews`
+                        : lang === 'bn'
+                        ? '০টি রিভিউ • কোনো রেটিং নেই'
+                        : '0 Reviews • No rating yet'}
+                    </span>
                   </div>
                 </div>
-                <span className="text-[11px] font-bold text-stone-500">৩৫০+ রিভিউ • ৯৯% সন্তুষ্টি</span>
-              </div>
-            </div>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 text-white px-5 py-3.5 rounded-2xl font-black text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4 text-[#F4D05F]" />
-              <span>{lang === 'bn' ? 'রিভিউ দিন' : 'Write Review'}</span>
-            </button>
-          </div>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center gap-2 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 text-white px-5 py-3.5 rounded-2xl font-black text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 text-[#F4D05F]" />
+                  <span>{lang === 'bn' ? 'রিভিউ দিন' : 'Write Review'}</span>
+                </button>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Filter Pills */}
@@ -203,82 +249,120 @@ export function CustomerReviews() {
           </button>
         </div>
 
-        {/* Review Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {filteredReviews.map((rev) => (
-            <motion.div
-              key={rev.id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-3xl p-5 border-2 border-stone-200/90 shadow-2xs hover:shadow-lg hover:border-emerald-300 transition-all duration-300 flex flex-col justify-between space-y-4"
+        {/* Review Cards Grid or Empty State */}
+        {filteredReviews.length === 0 ? (
+          <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border-2 border-stone-200/90 shadow-2xs space-y-4 max-w-lg mx-auto">
+            <div className="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 mx-auto flex items-center justify-center">
+              <Star className="w-8 h-8 text-amber-500" />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="font-black text-lg text-stone-900">
+                {reviews.length === 0
+                  ? lang === 'bn'
+                    ? 'এখনো কোনো কাস্টমার রিভিউ যোগ করা হয়নি'
+                    : 'No Customer Reviews Added Yet'
+                  : lang === 'bn'
+                  ? 'এই ফিল্টারে কোনো রিভিউ পাওয়া যায়নি'
+                  : 'No reviews found in this filter'}
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
+                {reviews.length === 0
+                  ? lang === 'bn'
+                    ? 'আমাদের খাবার কেমন লেগেছে? আপনি কি খাবার টেস্ট করেছেন? প্রথম রিভিউটি দিয়ে আপনার মূল্যবান মতামত জানান!'
+                    : 'Have you tasted our food? Be the first to share your dining experience and leave a review!'
+                  : lang === 'bn'
+                  ? 'অন্য ফিল্টার নির্বাচন করে দেখুন অথবা নতুন রিভিউ দিন।'
+                  : 'Try selecting another filter or write a new review.'}
+              </p>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 text-white px-5 py-3 rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer"
             >
-              <div className="space-y-3">
-                {/* Header: User Info & Stars */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 text-[#0B5D3B] font-black flex items-center justify-center text-sm">
-                      {rev.name.slice(0, 1)}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-black text-sm text-stone-900 leading-tight">
-                          {rev.name}
-                        </span>
-                        {rev.isVerified && (
-                          <span title="যাচাইকৃত গ্রাহক">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <Plus className="w-4 h-4 text-[#F4D05F]" />
+              <span>{lang === 'bn' ? 'প্রথম রিভিউ দিন' : 'Write First Review'}</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {filteredReviews.map((rev) => (
+              <motion.div
+                key={rev.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-3xl p-5 border-2 border-stone-200/90 shadow-2xs hover:shadow-lg hover:border-emerald-300 transition-all duration-300 flex flex-col justify-between space-y-4"
+              >
+                <div className="space-y-3">
+                  {/* Header: User Info & Stars */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 text-[#0B5D3B] font-black flex items-center justify-center text-sm">
+                        {rev.name.slice(0, 1)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-black text-sm text-stone-900 leading-tight">
+                            {rev.name}
                           </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-stone-500 font-medium">
-                        <MapPin className="w-3 h-3 text-[#F7931E]" />
-                        <span>{rev.location || 'বেনাপোল'}</span>
+                          {rev.isVerified && (
+                            <span title="যাচাইকৃত গ্রাহক">
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] text-stone-500 font-medium">
+                          <MapPin className="w-3 h-3 text-[#F7931E]" />
+                          <span>{rev.location || 'বেনাপোল'}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <span className="text-[11px] font-bold text-stone-400 shrink-0">
-                    {rev.date}
-                  </span>
-                </div>
-
-                {/* Rating Stars & Ordered Dish Tag */}
-                <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-100">
-                  <div className="flex text-amber-400">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  {rev.foodName && (
-                    <span className="text-[11px] font-black bg-stone-100 text-stone-700 px-2.5 py-0.5 rounded-lg truncate max-w-[170px]">
-                      {rev.foodName}
+                    <span className="text-[11px] font-bold text-stone-400 shrink-0">
+                      {rev.date}
                     </span>
-                  )}
+                  </div>
+
+                  {/* Rating Stars & Ordered Dish Tag */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-100">
+                    <div className="flex text-amber-400">
+                      {[...Array(Number(rev.rating) || 5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    {rev.foodName && (
+                      <span className="text-[11px] font-black bg-stone-100 text-stone-700 px-2.5 py-0.5 rounded-lg truncate max-w-[170px]">
+                        {rev.foodName}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Review Text */}
+                  <p className="text-xs sm:text-sm text-stone-700 font-medium leading-relaxed">
+                    "{rev.comment}"
+                  </p>
                 </div>
 
-                {/* Review Text */}
-                <p className="text-xs sm:text-sm text-stone-700 font-medium leading-relaxed">
-                  "{rev.comment}"
-                </p>
-              </div>
-
-              {/* Bottom Helpful / Like Action */}
-              <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 font-bold">
-                <span className="text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md">
-                  ✓ ভেরিফাইড অর্ডার
-                </span>
-                <button
-                  onClick={() => handleLike(rev.id)}
-                  className="flex items-center gap-1.5 hover:text-[#0B5D3B] transition-colors cursor-pointer p-1"
-                >
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>উপকারী ({likeCounts[rev.id] || 8})</span>
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                {/* Bottom Helpful / Like Action */}
+                <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 font-bold">
+                  <span className="text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md">
+                    ✓ ভেরিফাইড রিভিউ
+                  </span>
+                  <button
+                    onClick={() => handleLike(rev.id)}
+                    className="flex items-center gap-1.5 hover:text-[#0B5D3B] transition-colors cursor-pointer p-1"
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5" />
+                    <span>
+                      {lang === 'bn' ? 'উপকারী' : 'Helpful'}
+                      {likeCounts[rev.id] ? ` (${likeCounts[rev.id]})` : ''}
+                    </span>
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Review Submission Modal */}

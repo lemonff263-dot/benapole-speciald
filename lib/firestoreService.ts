@@ -171,3 +171,19 @@ export async function syncMenuToFirestore(foods: any[], categories: any[]): Prom
   }
 }
 
+/**
+ * Save customer review to Firestore
+ */
+export async function saveReviewToFirestore(review: any): Promise<void> {
+  try {
+    const reviewRef = doc(db, 'config', `review_${review.id}`);
+    await setDoc(reviewRef, {
+      ...review,
+      syncedAt: new Date().toISOString(),
+    });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.warn('Firestore save review non-blocking fallback:', err.message);
+  }
+}
+

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/auth';
 import { getStore, saveStore } from '@/lib/store';
 import { FoodItem, Category } from '@/lib/types';
+import { syncMenuToFirestore } from '@/lib/firestoreService';
 
 export async function GET() {
   const isAuth = await verifyAdminSession();
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
 
       store.foods.unshift(newFood);
       saveStore(store);
+      void syncMenuToFirestore(store.foods, store.categories);
       return NextResponse.json({ success: true, item: newFood });
     }
 
@@ -62,6 +64,7 @@ export async function POST(req: NextRequest) {
 
       store.categories.push(newCategory);
       saveStore(store);
+      void syncMenuToFirestore(store.foods, store.categories);
       return NextResponse.json({ success: true, item: newCategory });
     }
 
@@ -94,6 +97,7 @@ export async function PUT(req: NextRequest) {
         price: Number(data.price) || store.foods[idx].price,
       };
       saveStore(store);
+      void syncMenuToFirestore(store.foods, store.categories);
       return NextResponse.json({ success: true, item: store.foods[idx] });
     }
 
@@ -108,6 +112,7 @@ export async function PUT(req: NextRequest) {
         ...data,
       };
       saveStore(store);
+      void syncMenuToFirestore(store.foods, store.categories);
       return NextResponse.json({ success: true, item: store.categories[idx] });
     }
 
@@ -136,12 +141,14 @@ export async function DELETE(req: NextRequest) {
     if (type === 'food') {
       store.foods = store.foods.filter((f) => f.id !== id);
       saveStore(store);
+      void syncMenuToFirestore(store.foods, store.categories);
       return NextResponse.json({ success: true });
     }
 
     if (type === 'category') {
       store.categories = store.categories.filter((c) => c.id !== id);
       saveStore(store);
+      void syncMenuToFirestore(store.foods, store.categories);
       return NextResponse.json({ success: true });
     }
 

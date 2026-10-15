@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowRight, Sparkles, Clock, CheckCircle2, Bike, Flame, Star, ShieldCheck, Receipt } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '@/context/AppContext';
 import { checkRestaurantOpenStatus } from '@/lib/openingHours';
+import { defaultReviews } from '@/lib/constants';
 
 export function HeroBanner({
   onOrderNowClick,
@@ -15,10 +17,82 @@ export function HeroBanner({
   const { lang, t, theme, settings, foods, setSelectedFoodForModal } = useApp();
   const hero = theme.sections.hero;
 
-  if (!hero.enabled) return null;
-
   const openStatus = checkRestaurantOpenStatus(settings);
   const signatureFood = foods.find((f) => f.id === 'doi-chira-signature') || foods[0];
+
+  // Load genuine reviews from localStorage
+  const [realReviews, setRealReviews] = useState<any[]>([]);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('benapole_customer_reviews');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const valid = parsed.filter((p) => p && p.id && !p.id.startsWith('rev_'));
+          setRealReviews(valid);
+        }
+      }
+    } catch {
+      // non-blocking
+    }
+  }, []);
+
+  const avgRatingNum = realReviews.length > 0
+    ? realReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realReviews.length
+    : 0;
+  const toBnDigits = (str: string) =>
+    str
+      .replace(/0/g, '০')
+      .replace(/1/g, '১')
+      .replace(/2/g, '২')
+      .replace(/3/g, '৩')
+      .replace(/4/g, '৪')
+      .replace(/5/g, '৫')
+      .replace(/6/g, '৬')
+      .replace(/7/g, '৭')
+      .replace(/8/g, '৮')
+      .replace(/9/g, '৯');
+  const avgRatingDisplay = lang === 'bn' ? toBnDigits(avgRatingNum > 0 ? avgRatingNum.toFixed(1) : '০.০') : (avgRatingNum > 0 ? avgRatingNum.toFixed(1) : '0.0');
+
+  // Live rotating food review ticker (changes randomly every 1 second across foods or real reviews)
+  const [tickerIndex, setTickerIndex] = useState(0);
+
+  const reviewPool = useMemo(() => {
+    if (!foods || foods.length === 0) return [];
+
+    return foods.map((f) => {
+      const matched = realReviews.find(
+        (r) =>
+          r.foodName?.toLowerCase().includes(f.name.bn.toLowerCase()) ||
+          r.foodName?.toLowerCase().includes(f.name.en.toLowerCase())
+      );
+      return {
+        food: f,
+        rating: matched ? matched.rating : 0,
+        ratingText: matched ? (lang === 'bn' ? `${toBnDigits(matched.rating.toString())}.০` : `${matched.rating}.0`) : (lang === 'bn' ? 'তাজা' : 'Fresh'),
+        quote: matched ? matched.comment : (lang === 'bn' ? '১০০% খাঁটি ও তাজা উপকরণে প্রস্তুত' : 'Made with 100% pure & fresh ingredients'),
+      };
+    });
+  }, [foods, realReviews, lang]);
+
+  useEffect(() => {
+    if (reviewPool.length <= 1) return;
+    const interval = setInterval(() => {
+      setTickerIndex((prev) => {
+        let next = Math.floor(Math.random() * reviewPool.length);
+        if (next === prev && reviewPool.length > 1) {
+          next = (prev + 1) % reviewPool.length;
+        }
+        return next;
+      });
+    }, 1000); // 1-second interval
+
+    return () => clearInterval(interval);
+  }, [reviewPool.length]);
+
+  if (!hero.enabled) return null;
+
+  const currentReviewedItem = reviewPool[tickerIndex] || reviewPool[0];
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FFFDF7] via-[#FFF9EE] to-[#F7F5EE] border-b border-stone-200/80 pt-6 pb-10 sm:py-16">
@@ -57,8 +131,21 @@ export function HeroBanner({
               </div>
 
               <div className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-extrabold shadow-2xs">
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span>{lang === 'bn' ? '৪.৯ স্টার রেটিং' : '4.9 Star Rating'}</span>
+                {realReviews.length > 0 ? (
+                  <>
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span>
+                      {lang === 'bn'
+                        ? `${avgRatingDisplay} স্টার (${toBnDigits(realReviews.length.toString())} রিভিউ)`
+                        : `${avgRatingDisplay} Star (${realReviews.length} Reviews)`}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{lang === 'bn' ? '১০০% খাঁটি ও স্বাস্থ্যকর' : '100% Pure & Hygienic'}</span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -101,16 +188,68 @@ export function HeroBanner({
                 </div>
               </div>
 
-              <div className="col-span-2 sm:col-span-1 flex items-center gap-2 bg-white px-3 py-2.5 rounded-2xl border border-stone-200 shadow-2xs">
-                <div className="p-1.5 rounded-xl bg-teal-50 text-[#0B5D3B]">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <div className="text-left">
-                  <span className="text-xs sm:text-sm font-black text-stone-900 block leading-tight">
-                    ক্যাশ অন ডেলিভারি
-                  </span>
-                  <span className="text-[11px] text-stone-500 font-medium">ও বিকাশ সুবিধা</span>
-                </div>
+              {/* 3. Live 1-Second Random Food Review Animated Ticker Box (User Requested) */}
+              <div
+                onClick={() => {
+                  if (currentReviewedItem?.food) {
+                    setSelectedFoodForModal(currentReviewedItem.food);
+                  }
+                }}
+                className="col-span-2 sm:col-span-1 bg-white hover:bg-emerald-50/50 p-2 sm:p-2.5 rounded-2xl border-2 border-amber-300/80 shadow-2xs hover:shadow-md transition-all cursor-pointer overflow-hidden min-h-[64px] flex items-center"
+                title="খাবারটির রিভিউ দেখতে ক্লিক করুন"
+              >
+                <AnimatePresence mode="wait">
+                  {currentReviewedItem && (
+                    <motion.div
+                      key={`${currentReviewedItem.food.id}-${tickerIndex}`}
+                      initial={{ opacity: 0, y: 7, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -7, scale: 0.96 }}
+                      transition={{ duration: 0.28, ease: 'easeOut' }}
+                      className="flex items-center gap-2.5 w-full min-w-0"
+                    >
+                      {/* Square Food Image */}
+                      <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-stone-100 border border-amber-300 shrink-0 shadow-2xs">
+                        <img
+                          src={currentReviewedItem.food.image}
+                          alt={currentReviewedItem.food.name.bn}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/images/doi_chira.jpg';
+                          }}
+                        />
+                      </div>
+
+                      {/* Food Name, Star Rating & Review Quote */}
+                      <div className="flex-1 min-w-0 text-left">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-black text-stone-900 truncate leading-tight block">
+                            {currentReviewedItem.food.name.bn}
+                          </span>
+                          <div className="flex items-center gap-0.5 shrink-0 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200">
+                            <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                            <span className="text-[10px] font-black text-amber-900">
+                              {currentReviewedItem.ratingText}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-[10px] sm:text-[11px] text-stone-600 truncate italic font-medium mt-0.5">
+                          "{currentReviewedItem.quote}"
+                        </p>
+
+                        <div className="flex items-center justify-between text-[9px] text-stone-500 font-bold mt-0.5">
+                          <span className="text-[#0B5D3B] flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                            <span>১ সেঃ লাইভ রিভিউ</span>
+                          </span>
+                          <span className="text-stone-400">ক্যাশ ও বিকাশ</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 

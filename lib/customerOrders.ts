@@ -22,7 +22,21 @@ export function getCustomerOrders(): SavedCustomerOrder[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    // Automatically purge legacy test or demo seed orders
+    const cleaned = parsed.filter(
+      (o) =>
+        o &&
+        o.id &&
+        !o.id.includes('seed') &&
+        !o.id.includes('261010-9281') &&
+        !o.id.includes('261010-8419') &&
+        !o.id.includes('261011-2348')
+    );
+    if (cleaned.length !== parsed.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch (e) {
     console.warn('Failed to parse customer orders from storage', e);
     return [];

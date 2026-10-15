@@ -501,6 +501,18 @@ export function AdminDashboard({
     });
   };
 
+  const handleOpenAddFood = () => {
+    setFoodFormData({
+      id: 'food_' + Date.now().toString(36),
+      name: { bn: '', en: '' },
+      description: { bn: '', en: '' },
+      price: 100,
+      categoryId: categoriesList[0]?.id || 'doi_chira',
+      image: '/images/doi_chira.jpg',
+      isAvailable: true,
+    });
+    setIsAddingFood(true);
+  };
 
   const handleSaveFoodForm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1218,8 +1230,18 @@ export function AdminDashboard({
                 <tbody className="divide-y divide-stone-100">
                   {orders.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="p-8 text-center text-stone-400">
-                        কোনো অর্ডার পাওয়া যায়নি
+                      <td colSpan={8} className="p-12 text-center text-stone-500">
+                        <div className="space-y-2 max-w-sm mx-auto">
+                          <ShoppingBag className="w-10 h-10 mx-auto text-stone-300" />
+                          <p className="font-extrabold text-stone-700 text-sm">
+                            {lang === 'bn' ? 'বর্তমানে কোনো নতুন অর্ডার নেই' : 'No Orders Yet'}
+                          </p>
+                          <p className="text-[11px] text-stone-400">
+                            {lang === 'bn'
+                              ? 'গ্রাহকরা ওয়েবসাইট থেকে খাবার অর্ডার করলে এখানে রিয়েল-টাইম তথ্য ও স্ট্যাটাস দেখতে পাবেন।'
+                              : 'Customer orders will appear here automatically in real time.'}
+                          </p>
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -1327,18 +1349,7 @@ export function AdminDashboard({
                 <p className="text-xs text-stone-500">মেনুর পদ যোগ, স্টক অন/অফ এবং দাম পরিবর্তন করুন</p>
               </div>
               <button
-                onClick={() => {
-                  setFoodFormData({
-                    id: 'food_' + Date.now().toString(36),
-                    name: { bn: '', en: '' },
-                    description: { bn: '', en: '' },
-                    price: 100,
-                    categoryId: categoriesList[0]?.id || 'doi_chira',
-                    image: '/images/doi_chira.jpg',
-                    isAvailable: true,
-                  });
-                  setIsAddingFood(true);
-                }}
+                onClick={handleOpenAddFood}
                 className="flex items-center gap-1.5 bg-[#0B5D3B] text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-[#08482E]"
               >
                 <Plus className="w-4 h-4" />
@@ -1346,56 +1357,77 @@ export function AdminDashboard({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {foodsList.map((food) => (
-                <div
-                  key={food.id}
-                  className="bg-white p-4 rounded-2xl border border-stone-200 flex gap-3 items-center justify-between shadow-2xs"
+            {foodsList.length === 0 ? (
+              <div className="bg-white p-12 text-center rounded-2xl border border-stone-200 shadow-2xs space-y-3">
+                <Utensils className="w-10 h-10 mx-auto text-stone-300" />
+                <h4 className="font-black text-sm text-stone-800">
+                  {lang === 'bn' ? 'বর্তমানে কোনো খাবার যোগ করা নেই' : 'No Food Items Added Yet'}
+                </h4>
+                <p className="text-xs text-stone-500 max-w-sm mx-auto">
+                  {lang === 'bn'
+                    ? 'উপরের "+ নতুন খাবার যোগ করুন" বাটনে ক্লিক করে মেনুতে নতুন খাবার যুক্ত করুন।'
+                    : 'Click "+ Add Food Item" above to add your first menu item.'}
+                </p>
+                <button
+                  onClick={handleOpenAddFood}
+                  className="inline-flex items-center gap-1.5 bg-[#0B5D3B] text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-[#08482E]"
                 >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={food.image || '/images/doi_chira.jpg'}
-                      alt={food.name.bn}
-                      className="w-14 h-14 rounded-xl object-cover border border-stone-200"
-                    />
-                    <div>
-                      <h4 className="font-bold text-xs text-stone-900">{food.name.bn}</h4>
-                      <span className="text-[11px] text-stone-500 block">{food.name.en}</span>
-                      <span className="text-xs font-extrabold text-[#0B5D3B]">৳{food.price}</span>
+                  <Plus className="w-4 h-4" />
+                  <span>{lang === 'bn' ? 'প্রথম খাবার যুক্ত করুন' : 'Add First Food'}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {foodsList.map((food) => (
+                  <div
+                    key={food.id}
+                    className="bg-white p-4 rounded-2xl border border-stone-200 flex gap-3 items-center justify-between shadow-2xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={food.image || '/images/doi_chira.jpg'}
+                        alt={food.name.bn}
+                        className="w-14 h-14 rounded-xl object-cover border border-stone-200"
+                      />
+                      <div>
+                        <h4 className="font-bold text-xs text-stone-900">{food.name.bn}</h4>
+                        <span className="text-[11px] text-stone-500 block">{food.name.en}</span>
+                        <span className="text-xs font-extrabold text-[#0B5D3B]">৳{food.price}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleToggleFoodStock(food)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                          food.isAvailable
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {food.isAvailable ? 'স্টক আছে' : 'স্টক শেষ'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setFoodFormData(food);
+                          setIsEditingFood(food);
+                        }}
+                        className="p-1.5 text-stone-500 hover:bg-stone-100 rounded-lg"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteFood(food.id, food.name.bn)}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                        title="খাবারটি মুছুন"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleToggleFoodStock(food)}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
-                        food.isAvailable
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {food.isAvailable ? 'স্টক আছে' : 'স্টক শেষ'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setFoodFormData(food);
-                        setIsEditingFood(food);
-                      }}
-                      className="p-1.5 text-stone-500 hover:bg-stone-100 rounded-lg"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteFood(food.id, food.name.bn)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
-                      title="খাবারটি মুছুন"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

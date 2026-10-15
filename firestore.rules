@@ -32,8 +32,7 @@ service cloud.firestore {
     }
 
     function isValidMenuConfig(data) {
-      return data is map &&
-        data.updatedAt is string && data.updatedAt.size() <= 40;
+      return data is map;
     }
 
     // Orders Collection
