@@ -32,7 +32,8 @@ export async function verifyAdminSession(): Promise<boolean> {
 
 export function checkAdminPassword(password: string): boolean {
   const store = getStore();
-  return password === store.adminPasswordHash || password === 'benapole123';
+  const currentHash = store.adminPasswordHash || 'benapole123';
+  return password === currentHash;
 }
 
 export function getAdminCookieHeader(): { name: string; value: string; options: object } {

@@ -2,7 +2,7 @@
   "entities": {
     "order": {
       "title": "Order",
-      "description": "Customer food order with items, customer details, delivery location, payment, and status",
+      "description": "Customer food order with item details, delivery information, payment details, and status history",
       "type": "object",
       "properties": {
         "id": { "type": "string", "description": "Unique Order ID (e.g. BS-261012-1234)" },
@@ -33,17 +33,67 @@
     },
     "menuConfig": {
       "title": "MenuConfig",
-      "description": "Live restaurant foods, categories, promo offers, settings, and visual theme configuration",
+      "description": "Live restaurant foods, categories, promo offers, and version concurrency lock",
       "type": "object",
       "properties": {
         "categories": { "type": "array", "description": "Food menu categories" },
         "foods": { "type": "array", "description": "Restaurant menu food items" },
         "offers": { "type": "array", "description": "Promotional offers and voucher discounts" },
-        "settings": { "type": "object", "description": "Restaurant operating settings, delivery fee, and contacts" },
-        "theme": { "type": "object", "description": "Visual branding colors, banner text, and typography" },
+        "version": { "type": "number", "description": "Atomic incremental version for concurrency conflict resolution" },
         "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of last configuration update" }
       },
       "required": ["updatedAt"]
+    },
+    "restaurantSettings": {
+      "title": "RestaurantSettings",
+      "description": "Restaurant operating hours, weekly schedule, delivery areas, fees, and contact configs",
+      "type": "object",
+      "properties": {
+        "restaurantName": { "type": "string", "description": "Restaurant display name" },
+        "tagline": { "type": "string", "description": "Bilingual marketing tagline" },
+        "phone": { "type": "string", "description": "Primary hotline phone" },
+        "email": { "type": "string", "description": "Support email address" },
+        "address": { "type": "string", "description": "Physical restaurant street address in Benapole" },
+        "isOpen": { "type": "boolean", "description": "Emergency manual open/close override" },
+        "isOrderAccepting": { "type": "boolean", "description": "Whether restaurant is currently accepting online orders" },
+        "deliveryFee": { "type": "number", "description": "Default delivery fee in BDT" },
+        "freeDeliveryThreshold": { "type": "number", "description": "Threshold for free delivery in BDT" },
+        "minOrderAmount": { "type": "number", "description": "Minimum required order subtotal in BDT" },
+        "deliveryAreas": { "type": "array", "description": "Configured delivery zones and area-specific fees" },
+        "weeklySchedule": { "type": "array", "description": "Seven-day operational schedule with open and close times" },
+        "telegramConfig": { "type": "object", "description": "Telegram bot alerts configuration" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of last update" }
+      },
+      "required": ["updatedAt"]
+    },
+    "themeConfig": {
+      "title": "ThemeConfig",
+      "description": "Visual website customizer theme, colors, hero banner texts, and published history",
+      "type": "object",
+      "properties": {
+        "draftTheme": { "type": "object", "description": "Unpublished working draft theme" },
+        "publishedTheme": { "type": "object", "description": "Live production website theme" },
+        "history": { "type": "array", "description": "Audit history of published versions" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of last theme update" }
+      },
+      "required": ["updatedAt"]
+    },
+    "review": {
+      "title": "Review",
+      "description": "Real verified customer review with star rating, dish reference, and feedback comment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique Review ID (e.g. rev_m1234)" },
+        "name": { "type": "string", "description": "Customer reviewer name" },
+        "location": { "type": "string", "description": "Customer location or union in Benapole" },
+        "foodName": { "type": "string", "description": "Name of ordered food reviewed" },
+        "rating": { "type": "number", "description": "Star rating between 1 and 5" },
+        "comment": { "type": "string", "description": "Customer feedback commentary text" },
+        "date": { "type": "string", "description": "Display date or ISO timestamp" },
+        "isVerified": { "type": "boolean", "description": "Whether review is from a verified order" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of review submission" }
+      },
+      "required": ["id", "name", "rating", "comment", "createdAt"]
     }
   },
   "firestore": {
@@ -53,7 +103,19 @@
     },
     "/config/menu": {
       "schema": { "$ref": "#/entities/menuConfig" },
-      "description": "Singleton configuration document holding live synchronized menu and restaurant settings"
+      "description": "Singleton configuration document holding live synchronized food menu, categories, and offers"
+    },
+    "/config/restaurant_settings": {
+      "schema": { "$ref": "#/entities/restaurantSettings" },
+      "description": "Singleton restaurant operating settings, delivery fee, schedule, and alert configuration"
+    },
+    "/config/theme": {
+      "schema": { "$ref": "#/entities/themeConfig" },
+      "description": "Visual customizer branding theme, colors, and banner settings"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/review" },
+      "description": "Customer reviews and ratings collection"
     }
   }
 }

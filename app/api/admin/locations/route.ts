@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/auth';
-import { getStore, saveStore, defaultSettings } from '@/lib/store';
+import { getStore, saveStore, syncStoreWithFirestore, defaultSettings } from '@/lib/store';
 import { DeliveryArea } from '@/lib/types';
+import { saveSettingsToFirestore } from '@/lib/firestoreService';
 
 export async function GET() {
   const isAuth = await verifyAdminSession();
   if (!isAuth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const store = getStore();
+  const store = await syncStoreWithFirestore();
   const areas = store.settings.deliveryAreas || defaultSettings.deliveryAreas;
   return NextResponse.json({ locations: areas });
 }
@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
         bn: body.name.bn.trim(),
         en: (body.name.en || body.name.bn).trim(),
       },
-      fee: Number(body.fee) !== undefined && !isNaN(Number(body.fee)) ? Number(body.fee) : store.settings.deliveryFee,
+      fee:
+        Number(body.fee) !== undefined && !isNaN(Number(body.fee))
+          ? Number(body.fee)
+          : store.settings.deliveryFee,
       landmark: body.landmark ? body.landmark.trim() : undefined,
       isPopular: Boolean(body.isPopular),
       coordinates: body.coordinates
@@ -41,14 +44,32 @@ export async function POST(req: NextRequest) {
         : undefined,
     };
 
-    if (!store.settings.deliveryAreas) {
-      store.settings.deliveryAreas = [...defaultSettings.deliveryAreas];
+    const currentAreas = store.settings.deliveryAreas || [...defaultSettings.deliveryAreas];
+    const updatedAreas = [...currentAreas, newLocation];
+    const updatedSettings = {
+      ...store.settings,
+      deliveryAreas: updatedAreas,
+    };
+
+    // Await durable write to Firestore
+    try {
+      await saveSettingsToFirestore(updatedSettings);
+    } catch (dbErr) {
+      console.error('Critical: Failed to save location to Firestore:', dbErr);
+      return NextResponse.json(
+        { error: 'লোকেশনটি ডেটাবেজে সংরক্ষণ করা সম্ভব হয়নি / Failed to persist location' },
+        { status: 500 }
+      );
     }
 
-    store.settings.deliveryAreas.push(newLocation);
+    store.settings = updatedSettings;
     saveStore(store);
 
-    return NextResponse.json({ success: true, location: newLocation, locations: store.settings.deliveryAreas });
+    return NextResponse.json({
+      success: true,
+      location: newLocation,
+      locations: store.settings.deliveryAreas,
+    });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create location';
     return NextResponse.json({ error: msg }, { status: 500 });
@@ -64,14 +85,47 @@ export async function PUT(req: NextRequest) {
     const store = getStore();
 
     if (body.resetToDefault) {
-      store.settings.deliveryAreas = JSON.parse(JSON.stringify(defaultSettings.deliveryAreas));
+      const resetAreas = JSON.parse(JSON.stringify(defaultSettings.deliveryAreas));
+      const updatedSettings = {
+        ...store.settings,
+        deliveryAreas: resetAreas,
+      };
+
+      try {
+        await saveSettingsToFirestore(updatedSettings);
+      } catch (dbErr) {
+        console.error('Critical: Failed to reset locations in Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'লোকেশন রিসেট ডেটাবেজে সংরক্ষণ করা সম্ভব হয়নি / Failed to reset locations' },
+          { status: 500 }
+        );
+      }
+
+      store.settings = updatedSettings;
       saveStore(store);
+
       return NextResponse.json({ success: true, locations: store.settings.deliveryAreas });
     }
 
     if (body.locations && Array.isArray(body.locations)) {
-      store.settings.deliveryAreas = body.locations;
+      const updatedSettings = {
+        ...store.settings,
+        deliveryAreas: body.locations,
+      };
+
+      try {
+        await saveSettingsToFirestore(updatedSettings);
+      } catch (dbErr) {
+        console.error('Critical: Failed to save locations list in Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'লোকেশন তালিকা ডেটাবেজে সংরক্ষণ করা সম্ভব হয়নি' },
+          { status: 500 }
+        );
+      }
+
+      store.settings = updatedSettings;
       saveStore(store);
+
       return NextResponse.json({ success: true, locations: store.settings.deliveryAreas });
     }
 
@@ -85,19 +139,39 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'লোকেশন পাওয়া যায়নি' }, { status: 404 });
     }
 
-    areas[index] = {
-      ...areas[index],
-      name: body.name ? { bn: body.name.bn, en: body.name.en || body.name.bn } : areas[index].name,
-      fee: body.fee !== undefined ? Number(body.fee) : areas[index].fee,
-      landmark: body.landmark !== undefined ? body.landmark : areas[index].landmark,
-      isPopular: body.isPopular !== undefined ? Boolean(body.isPopular) : areas[index].isPopular,
-      coordinates: body.coordinates ? body.coordinates : areas[index].coordinates,
+    const updatedAreas = [...areas];
+    updatedAreas[index] = {
+      ...updatedAreas[index],
+      name: body.name ? { bn: body.name.bn, en: body.name.en || body.name.bn } : updatedAreas[index].name,
+      fee: body.fee !== undefined ? Number(body.fee) : updatedAreas[index].fee,
+      landmark: body.landmark !== undefined ? body.landmark : updatedAreas[index].landmark,
+      isPopular: body.isPopular !== undefined ? Boolean(body.isPopular) : updatedAreas[index].isPopular,
+      coordinates: body.coordinates ? body.coordinates : updatedAreas[index].coordinates,
     };
 
-    store.settings.deliveryAreas = areas;
+    const updatedSettings = {
+      ...store.settings,
+      deliveryAreas: updatedAreas,
+    };
+
+    try {
+      await saveSettingsToFirestore(updatedSettings);
+    } catch (dbErr) {
+      console.error('Critical: Failed to update location in Firestore:', dbErr);
+      return NextResponse.json(
+        { error: 'লোকেশন আপডেট ডেটাবেজে সংরক্ষণ করা সম্ভব হয়নি' },
+        { status: 500 }
+      );
+    }
+
+    store.settings = updatedSettings;
     saveStore(store);
 
-    return NextResponse.json({ success: true, location: areas[index], locations: store.settings.deliveryAreas });
+    return NextResponse.json({
+      success: true,
+      location: updatedAreas[index],
+      locations: store.settings.deliveryAreas,
+    });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to update location';
     return NextResponse.json({ error: msg }, { status: 500 });
@@ -111,7 +185,6 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     let id = searchParams.get('id');
-
     if (!id) {
       try {
         const body = await req.json();
@@ -125,7 +198,24 @@ export async function DELETE(req: NextRequest) {
 
     const store = getStore();
     const areas = store.settings.deliveryAreas || [...defaultSettings.deliveryAreas];
-    store.settings.deliveryAreas = areas.filter((a) => a.id !== id);
+    const updatedAreas = areas.filter((a) => a.id !== id);
+
+    const updatedSettings = {
+      ...store.settings,
+      deliveryAreas: updatedAreas,
+    };
+
+    try {
+      await saveSettingsToFirestore(updatedSettings);
+    } catch (dbErr) {
+      console.error('Critical: Failed to delete location in Firestore:', dbErr);
+      return NextResponse.json(
+        { error: 'লোকেশনটি ডেটাবেজ থেকে মুছে ফেলা সম্ভব হয়নি' },
+        { status: 500 }
+      );
+    }
+
+    store.settings = updatedSettings;
     saveStore(store);
 
     return NextResponse.json({ success: true, locations: store.settings.deliveryAreas });

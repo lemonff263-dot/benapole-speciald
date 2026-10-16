@@ -19,11 +19,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CustomerReview } from '@/lib/types';
 import { defaultReviews } from '@/lib/constants';
 import { useApp } from '@/context/AppContext';
-import { saveReviewToFirestore } from '@/lib/firestoreService';
 
 export function CustomerReviews() {
   const { lang, t } = useApp();
-
   const [reviews, setReviews] = useState<CustomerReview[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'doi_chira' | 'fast_food' | '5_star'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,24 +34,45 @@ export function CustomerReviews() {
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState('');
   const [formSuccess, setFormSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  // Load reviews from localStorage if available, filtering out any demo reviews
+  // Load reviews from /api/reviews with localStorage fallback
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('benapole_customer_reviews');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          const realReviews = parsed.filter(
-            (p: any) => p && p.id && !p.id.startsWith('rev_1') && !p.id.startsWith('rev_2') && !p.id.startsWith('rev_3') && !p.id.startsWith('rev_4') && !p.id.startsWith('rev_5')
-          );
-          setReviews(realReviews);
-          localStorage.setItem('benapole_customer_reviews', JSON.stringify(realReviews));
+    let isMounted = true;
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`/api/reviews?t=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && Array.isArray(data.reviews)) {
+            setReviews(data.reviews);
+            try {
+              localStorage.setItem('benapole_customer_reviews', JSON.stringify(data.reviews));
+            } catch {}
+            return;
+          }
         }
+      } catch (err) {
+        console.warn('Failed to fetch reviews from server, checking local storage:', err);
       }
-    } catch {
-      // non-blocking
-    }
+
+      // Local storage fallback
+      try {
+        const stored = localStorage.getItem('benapole_customer_reviews');
+        if (isMounted && stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setReviews(parsed);
+          }
+        }
+      } catch {}
+    };
+
+    fetchReviews();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleLike = (id: string) => {
@@ -63,40 +82,52 @@ export function CustomerReviews() {
     }));
   };
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newComment.trim()) return;
 
-    const newRev: CustomerReview = {
-      id: 'rev_' + Date.now().toString(36),
-      name: newName.trim(),
-      location: newLocation.trim() || 'বেনাপোল',
-      foodName: newFoodName.trim(),
-      rating: newRating,
-      comment: newComment.trim(),
-      date: lang === 'bn' ? 'এইমাত্র' : 'Just now',
-      isVerified: true,
-    };
-
-    const updated = [newRev, ...reviews];
-    setReviews(updated);
+    setIsSubmitting(true);
+    setSubmitError('');
 
     try {
-      localStorage.setItem('benapole_customer_reviews', JSON.stringify(updated));
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newName.trim(),
+          location: newLocation.trim() || 'বেনাপোল পৌরসভা',
+          foodName: newFoodName.trim() || 'বেনাপোল স্পেশাল ফুড',
+          rating: newRating,
+          comment: newComment.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setSubmitError(data.error || 'রিভিউ সাবমিট করতে সমস্যা হয়েছে');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const savedReview: CustomerReview = data.review;
+      const updated = [savedReview, ...reviews];
+      setReviews(updated);
+      try {
+        localStorage.setItem('benapole_customer_reviews', JSON.stringify(updated));
+      } catch {}
+
+      setFormSuccess(true);
+      setTimeout(() => {
+        setFormSuccess(false);
+        setIsModalOpen(false);
+        setNewName('');
+        setNewComment('');
+        setIsSubmitting(false);
+      }, 1200);
     } catch {
-      // ignore
+      setSubmitError('ইন্টারনেট সংযোগ চেক করুন এবং পুনরায় চেষ্টা করুন');
+      setIsSubmitting(false);
     }
-
-    // Sync to Firestore in background
-    void saveReviewToFirestore(newRev);
-
-    setFormSuccess(true);
-    setTimeout(() => {
-      setFormSuccess(false);
-      setIsModalOpen(false);
-      setNewName('');
-      setNewComment('');
-    }, 1200);
   };
 
   const filteredReviews = reviews.filter((r) => {
@@ -497,12 +528,27 @@ export function CustomerReviews() {
                     />
                   </div>
 
+                  {submitError && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-bold">
+                      {submitError}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full bg-[#0B5D3B] hover:bg-[#08482E] active:scale-98 text-white font-black text-sm py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#0B5D3B] hover:bg-[#08482E] active:scale-98 disabled:opacity-60 text-white font-black text-sm py-3.5 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <Send className="w-4 h-4 text-[#F4D05F]" />
-                    <span>{lang === 'bn' ? 'রিভিউ সাবমিট করুন' : 'Submit Review'}</span>
+                    <Send className={`w-4 h-4 text-[#F4D05F] ${isSubmitting ? 'animate-spin' : ''}`} />
+                    <span>
+                      {isSubmitting
+                        ? lang === 'bn'
+                          ? 'সংরক্ষণ করা হচ্ছে...'
+                          : 'Saving...'
+                        : lang === 'bn'
+                        ? 'রিভিউ সাবমিট করুন'
+                        : 'Submit Review'}
+                    </span>
                   </button>
                 </form>
               )}

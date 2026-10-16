@@ -1,15 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Default deny all unknown collections
+    // Default-deny all unknown collections
     match /{document=**} {
       allow read, write: if false;
     }
 
     // Helper functions
     function isValidId(id) {
-      return id is string && id.size() <= 128;
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
     function incoming() {
@@ -31,28 +30,41 @@ service cloud.firestore {
         data.createdAt is string && data.createdAt.size() <= 40;
     }
 
-    function isValidMenuConfig(data) {
+    function isValidConfig(data) {
       return data is map;
+    }
+
+    function isValidReview(data) {
+      return data is map &&
+        data.id is string && data.id.size() <= 64 &&
+        data.name is string && data.name.size() <= 120 &&
+        data.comment is string && data.comment.size() <= 600 &&
+        data.rating is number && data.rating >= 1 && data.rating <= 5;
     }
 
     // Orders Collection
     match /orders/{orderId} {
-      // Individual customer can get their order if matching orderId
       allow get: if isValidId(orderId);
-      // List all orders (e.g., admin management or sync)
       allow list: if true;
-      // Allow customer or server API to create valid order
       allow create: if isValidId(orderId) && isValidOrder(incoming());
-      // Allow updating order status or payment verification
       allow update: if isValidId(orderId) && isValidOrder(incoming());
-      // Admin delete
       allow delete: if isValidId(orderId);
     }
 
-    // Public / Config Collection (Menu & Settings)
+    // Config Collection (Menu, Settings, Theme, Admin Auth)
     match /config/{docId} {
-      allow read: if isValidId(docId);
-      allow write: if isValidId(docId) && isValidMenuConfig(incoming());
+      allow get: if isValidId(docId);
+      allow list: if true;
+      allow create, update: if isValidId(docId) && isValidConfig(incoming());
+      allow delete: if isValidId(docId);
+    }
+
+    // Customer Reviews Collection
+    match /reviews/{reviewId} {
+      allow get: if isValidId(reviewId);
+      allow list: if true;
+      allow create: if isValidId(reviewId) && isValidReview(incoming());
+      allow update, delete: if isValidId(reviewId);
     }
   }
 }

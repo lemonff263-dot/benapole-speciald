@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server';
-import { getStore } from '@/lib/store';
+import { syncStoreWithFirestore } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
-  const store = getStore();
+  const store = await syncStoreWithFirestore();
 
   // Strip sensitive telegram bot token from public settings
   const publicSettings = {
     ...store.settings,
     telegramConfig: {
-      enabled: store.settings.telegramConfig.enabled,
+      enabled: Boolean(store.settings?.telegramConfig?.enabled),
       botToken: '', // do not expose
       chatId: '', // do not expose
-      notifyOnNewOrder: store.settings.telegramConfig.notifyOnNewOrder,
-      notifyOnStatusChange: store.settings.telegramConfig.notifyOnStatusChange,
+      notifyOnNewOrder: Boolean(store.settings?.telegramConfig?.notifyOnNewOrder),
+      notifyOnStatusChange: Boolean(store.settings?.telegramConfig?.notifyOnStatusChange),
     },
   };
 

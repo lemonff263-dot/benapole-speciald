@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/auth';
-import { getStore, saveStore } from '@/lib/store';
+import { getStore, saveStore, syncStoreWithFirestore } from '@/lib/store';
 import { FoodItem, Category } from '@/lib/types';
-import { syncMenuToFirestore } from '@/lib/firestoreService';
+import { saveMenuToFirestore } from '@/lib/firestoreService';
 
 export async function GET() {
   const isAuth = await verifyAdminSession();
@@ -10,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const store = getStore();
+  const store = await syncStoreWithFirestore();
   return NextResponse.json({
     categories: store.categories,
     foods: store.foods,
@@ -47,9 +47,22 @@ export async function POST(req: NextRequest) {
         sortOrder: store.foods.length + 1,
       };
 
-      store.foods.unshift(newFood);
+      const updatedFoods = [newFood, ...store.foods];
+
+      // Await durable write to Firestore
+      try {
+        await saveMenuToFirestore(updatedFoods, store.categories, store.offers);
+      } catch (dbErr) {
+        console.error('Critical: Failed to save food to Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'খাবারটি ডেটাবেজে সংরক্ষণ করা যায়নি / Failed to persist to database' },
+          { status: 500 }
+        );
+      }
+
+      store.foods = updatedFoods;
       saveStore(store);
-      void syncMenuToFirestore(store.foods, store.categories);
+
       return NextResponse.json({ success: true, item: newFood });
     }
 
@@ -62,9 +75,22 @@ export async function POST(req: NextRequest) {
         isActive: true,
       };
 
-      store.categories.push(newCategory);
+      const updatedCategories = [...store.categories, newCategory];
+
+      // Await durable write to Firestore
+      try {
+        await saveMenuToFirestore(store.foods, updatedCategories, store.offers);
+      } catch (dbErr) {
+        console.error('Critical: Failed to save category to Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'ক্যাটাগরিটি ডেটাবেজে সংরক্ষণ করা যায়নি / Failed to persist to database' },
+          { status: 500 }
+        );
+      }
+
+      store.categories = updatedCategories;
       saveStore(store);
-      void syncMenuToFirestore(store.foods, store.categories);
+
       return NextResponse.json({ success: true, item: newCategory });
     }
 
@@ -91,14 +117,30 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ error: 'Food not found' }, { status: 404 });
       }
 
-      store.foods[idx] = {
+      const updatedFood = {
         ...store.foods[idx],
         ...data,
         price: Number(data.price) || store.foods[idx].price,
       };
+
+      const updatedFoods = [...store.foods];
+      updatedFoods[idx] = updatedFood;
+
+      // Await durable write to Firestore
+      try {
+        await saveMenuToFirestore(updatedFoods, store.categories, store.offers);
+      } catch (dbErr) {
+        console.error('Critical: Failed to update food in Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'খাবারের তথ্য ডেটাবেজে আপডেট করা যায়নি / Failed to persist to database' },
+          { status: 500 }
+        );
+      }
+
+      store.foods = updatedFoods;
       saveStore(store);
-      void syncMenuToFirestore(store.foods, store.categories);
-      return NextResponse.json({ success: true, item: store.foods[idx] });
+
+      return NextResponse.json({ success: true, item: updatedFood });
     }
 
     if (type === 'category') {
@@ -107,13 +149,29 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({ error: 'Category not found' }, { status: 404 });
       }
 
-      store.categories[idx] = {
+      const updatedCategory = {
         ...store.categories[idx],
         ...data,
       };
+
+      const updatedCategories = [...store.categories];
+      updatedCategories[idx] = updatedCategory;
+
+      // Await durable write to Firestore
+      try {
+        await saveMenuToFirestore(store.foods, updatedCategories, store.offers);
+      } catch (dbErr) {
+        console.error('Critical: Failed to update category in Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'ক্যাটাগরি ডেটাবেজে আপডেট করা যায়নি / Failed to persist to database' },
+          { status: 500 }
+        );
+      }
+
+      store.categories = updatedCategories;
       saveStore(store);
-      void syncMenuToFirestore(store.foods, store.categories);
-      return NextResponse.json({ success: true, item: store.categories[idx] });
+
+      return NextResponse.json({ success: true, item: updatedCategory });
     }
 
     return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
@@ -138,17 +196,44 @@ export async function DELETE(req: NextRequest) {
     }
 
     const store = getStore();
+
     if (type === 'food') {
-      store.foods = store.foods.filter((f) => f.id !== id);
+      const updatedFoods = store.foods.filter((f) => f.id !== id);
+
+      // Await durable write to Firestore
+      try {
+        await saveMenuToFirestore(updatedFoods, store.categories, store.offers);
+      } catch (dbErr) {
+        console.error('Critical: Failed to delete food from Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'খাবারটি ডেটাবেজ থেকে মুছে ফেলা যায়নি / Failed to delete from database' },
+          { status: 500 }
+        );
+      }
+
+      store.foods = updatedFoods;
       saveStore(store);
-      void syncMenuToFirestore(store.foods, store.categories);
+
       return NextResponse.json({ success: true });
     }
 
     if (type === 'category') {
-      store.categories = store.categories.filter((c) => c.id !== id);
+      const updatedCategories = store.categories.filter((c) => c.id !== id);
+
+      // Await durable write to Firestore
+      try {
+        await saveMenuToFirestore(store.foods, updatedCategories, store.offers);
+      } catch (dbErr) {
+        console.error('Critical: Failed to delete category from Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'ক্যাটাগরি ডেটাবেজ থেকে মুছে ফেলা যায়নি / Failed to delete from database' },
+          { status: 500 }
+        );
+      }
+
+      store.categories = updatedCategories;
       saveStore(store);
-      void syncMenuToFirestore(store.foods, store.categories);
+
       return NextResponse.json({ success: true });
     }
 

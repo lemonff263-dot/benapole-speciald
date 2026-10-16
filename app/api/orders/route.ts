@@ -3,7 +3,7 @@ import { getStore, saveStore } from '@/lib/store';
 import { Order, OrderItemSnapshot, OrderStatus } from '@/lib/types';
 import { formatNewOrderMessage, sendTelegramMessage } from '@/lib/telegram';
 import { checkRestaurantOpenStatus } from '@/lib/openingHours';
-import { saveOrderToFirestore } from '@/lib/firestoreService';
+import { saveOrderToFirestore, getOrderFromFirestore } from '@/lib/firestoreService';
 
 function generateOrderId(): string {
   const now = new Date();
@@ -235,15 +235,25 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date().toISOString(),
     };
 
+    // Await durable persistence to Firestore database
+    try {
+      await saveOrderToFirestore(newOrder);
+    } catch (dbErr) {
+      console.error('Critical: Failed to persist order to Firestore:', dbErr);
+      return NextResponse.json(
+        {
+          error:
+            'অর্ডারটি ডেটাবেজে সংরক্ষণ করা সম্ভব হয়নি। অনুগ্রহ করে ইন্টারনেট সংযোগ চেক করে পুনরায় চেষ্টা করুন। / Database write failed',
+        },
+        { status: 500 }
+      );
+    }
+
+    // Update in-memory / local cache
     store.orders.unshift(newOrder);
     saveStore(store);
 
-    // Synchronize to Firestore live database (non-blocking)
-    saveOrderToFirestore(newOrder).catch((err) => {
-      console.warn('Firestore live sync note:', err?.message || err);
-    });
-
-    // Asynchronous Telegram notification dispatch (non-blocking)
+    // Asynchronous Telegram notification dispatch
     if (
       store.settings?.telegramConfig?.enabled &&
       store.settings?.telegramConfig?.notifyOnNewOrder &&
@@ -282,8 +292,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'অর্ডার নম্বর প্রদান করুন / Order ID is required' }, { status: 400 });
   }
 
-  const store = getStore();
-  const order = store.orders.find((o) => o.id.toLowerCase() === orderId.trim().toLowerCase());
+  const cleanId = orderId.trim();
+  let order: Order | null = null;
+
+  // 1. First check Firestore live database
+  try {
+    order = await getOrderFromFirestore(cleanId);
+  } catch (err) {
+    console.warn('Firestore order fetch warning, falling back to local store:', err);
+  }
+
+  // 2. Fallback to local store if not found or if Firestore connection was down
+  if (!order) {
+    const store = getStore();
+    order = store.orders.find((o) => o.id.toLowerCase() === cleanId.toLowerCase()) || null;
+  }
 
   if (!order) {
     return NextResponse.json({ error: 'অর্ডারটি খুঁজে পাওয়া যায়নি / Order not found' }, { status: 404 });

@@ -3,7 +3,11 @@ import { verifyAdminSession } from '@/lib/auth';
 import { getStore, saveStore } from '@/lib/store';
 import { OrderStatus } from '@/lib/types';
 import { formatStatusUpdateMessage, sendTelegramMessage } from '@/lib/telegram';
-import { updateOrderStatusInFirestore, deleteOrderFromFirestore } from '@/lib/firestoreService';
+import {
+  updateOrderStatusInFirestore,
+  deleteOrderFromFirestore,
+  getOrdersFromFirestore,
+} from '@/lib/firestoreService';
 
 export async function GET(req: NextRequest) {
   const isAuth = await verifyAdminSession();
@@ -16,6 +20,24 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search')?.toLowerCase();
 
   const store = getStore();
+
+  // Hydrate with latest orders from Firestore live database
+  try {
+    const firestoreOrders = await getOrdersFromFirestore();
+    if (firestoreOrders && firestoreOrders.length > 0) {
+      const orderMap = new Map(store.orders.map((o) => [o.id, o]));
+      for (const fo of firestoreOrders) {
+        orderMap.set(fo.id, fo);
+      }
+      store.orders = Array.from(orderMap.values()).sort(
+        (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      );
+      saveStore(store);
+    }
+  } catch (err) {
+    console.warn('Firestore orders sync notice, using local store cache:', err);
+  }
+
   let filtered = [...store.orders];
 
   if (status && status !== 'all') {
@@ -79,6 +101,7 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const { orderId, newStatus, paymentStatus, note } = await req.json();
+
     if (!orderId) {
       return NextResponse.json({ error: 'অর্ডার আইডি আবশ্যক / Order ID is required' }, { status: 400 });
     }
@@ -111,6 +134,7 @@ export async function PATCH(req: NextRequest) {
         'completed',
         'cancelled',
       ];
+
       if (validStatuses.includes(normalizedStatus)) {
         order.status = normalizedStatus;
         order.statusHistory.push({
@@ -127,15 +151,22 @@ export async function PATCH(req: NextRequest) {
     }
 
     order.updatedAt = new Date().toISOString();
+
+    // Await status change to Firestore live database first
+    if (normalizedStatus) {
+      try {
+        await updateOrderStatusInFirestore(orderId, normalizedStatus, note, paymentStatus);
+      } catch (dbErr) {
+        console.error('Critical: Failed to update order status in Firestore:', dbErr);
+        return NextResponse.json(
+          { error: 'ডেটাবেজে অর্ডারের স্ট্যাটাস পরিবর্তন ব্যর্থ হয়েছে / Database update failed' },
+          { status: 500 }
+        );
+      }
+    }
+
     store.orders[orderIndex] = order;
     saveStore(store);
-
-    // Sync status change to Firestore live database
-    if (normalizedStatus) {
-      updateOrderStatusInFirestore(orderId, normalizedStatus, note, paymentStatus).catch((err) => {
-        console.warn('Firestore status update note:', err?.message || err);
-      });
-    }
 
     // Telegram notification if status updated
     if (
@@ -168,18 +199,25 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get('id') || searchParams.get('orderId');
+
     if (!orderId) {
       return NextResponse.json({ error: 'অর্ডার আইডি আবশ্যক / Order ID is required' }, { status: 400 });
+    }
+
+    // Await deletion in Firestore first
+    try {
+      await deleteOrderFromFirestore(orderId);
+    } catch (dbErr) {
+      console.error('Critical: Failed to delete order in Firestore:', dbErr);
+      return NextResponse.json(
+        { error: 'ডেটাবেজ থেকে অর্ডার মুছে ফেলা সম্ভব হয়নি / Database delete failed' },
+        { status: 500 }
+      );
     }
 
     const store = getStore();
     store.orders = store.orders.filter((o) => o.id !== orderId);
     saveStore(store);
-
-    // Sync deletion to Firestore
-    deleteOrderFromFirestore(orderId).catch((err) => {
-      console.warn('Firestore delete order note:', err?.message || err);
-    });
 
     return NextResponse.json({ success: true, message: 'অর্ডার মুছে ফেলা হয়েছে' });
   } catch (err) {
