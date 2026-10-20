@@ -29,20 +29,33 @@ export async function POST(req: NextRequest) {
     const store = getStore();
 
     if (type === 'food') {
+      const bnName = data.name?.bn?.trim();
+      if (!bnName) {
+        return NextResponse.json(
+          { error: 'খাবারের বাংলা নাম আবশ্যক (Food name in Bengali is required)' },
+          { status: 400 }
+        );
+      }
+
+      const enName = data.name?.en?.trim() || bnName;
+
       const newFood: FoodItem = {
         id: data.id || `food_${Date.now()}`,
-        name: data.name || { bn: 'নতুন খাবার', en: 'New Food' },
-        description: data.description || { bn: '', en: '' },
-        categoryId: data.categoryId || 'doi_chira',
-        price: Number(data.price) || 0,
-        compareAtPrice: data.compareAtPrice ? Number(data.compareAtPrice) : undefined,
+        name: { bn: bnName, en: enName },
+        description: {
+          bn: data.description?.bn?.trim() || '',
+          en: data.description?.en?.trim() || '',
+        },
+        categoryId: data.categoryId || (store.categories[0]?.id || 'doi_chira'),
+        price: Number(data.price) > 0 ? Number(data.price) : 0,
+        compareAtPrice: data.compareAtPrice && Number(data.compareAtPrice) > 0 ? Number(data.compareAtPrice) : undefined,
         image: data.image || '/images/doi_chira.jpg',
-        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+        isAvailable: data.isAvailable !== undefined ? Boolean(data.isAvailable) : true,
         isBestseller: !!data.isBestseller,
         isFeatured: !!data.isFeatured,
         isNew: !!data.isNew,
-        portionVariants: data.portionVariants || [],
-        addOns: data.addOns || [],
+        portionVariants: Array.isArray(data.portionVariants) ? data.portionVariants : [],
+        addOns: Array.isArray(data.addOns) ? data.addOns : [],
         prepTime: data.prepTime || '১০ মিনিট',
         sortOrder: store.foods.length + 1,
       };
@@ -52,10 +65,10 @@ export async function POST(req: NextRequest) {
       // Await durable write to Firestore
       try {
         await saveMenuToFirestore(updatedFoods, store.categories, store.offers);
-      } catch (dbErr) {
+      } catch (dbErr: any) {
         console.error('Critical: Failed to save food to Firestore:', dbErr);
         return NextResponse.json(
-          { error: 'খাবারটি ডেটাবেজে সংরক্ষণ করা যায়নি / Failed to persist to database' },
+          { error: `খাবারটি ডেটাবেজে সংরক্ষণ করা যায়নি: ${dbErr?.message || dbErr}` },
           { status: 500 }
         );
       }
@@ -120,7 +133,12 @@ export async function PUT(req: NextRequest) {
       const updatedFood = {
         ...store.foods[idx],
         ...data,
-        price: Number(data.price) || store.foods[idx].price,
+        name: {
+          bn: data.name?.bn ? data.name.bn.trim() : store.foods[idx].name.bn,
+          en: data.name?.en ? data.name.en.trim() : (data.name?.bn ? data.name.bn.trim() : store.foods[idx].name.en),
+        },
+        price: data.price !== undefined && !isNaN(Number(data.price)) ? Number(data.price) : store.foods[idx].price,
+        compareAtPrice: data.compareAtPrice !== undefined ? (Number(data.compareAtPrice) > 0 ? Number(data.compareAtPrice) : undefined) : store.foods[idx].compareAtPrice,
       };
 
       const updatedFoods = [...store.foods];

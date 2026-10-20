@@ -36,6 +36,9 @@ import {
   Building,
   KeyRound,
   Lock,
+  Loader2,
+  Sparkles,
+  Flame,
 } from 'lucide-react';
 import { Order, FoodItem, Category, Offer, RestaurantSettings, DeliveryArea } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
@@ -94,6 +97,7 @@ export function AdminDashboard({
   // Edit/Add food modal states
   const [isEditingFood, setIsEditingFood] = useState<FoodItem | null>(null);
   const [isAddingFood, setIsAddingFood] = useState(false);
+  const [isSavingFood, setIsSavingFood] = useState(false);
   const [foodFormData, setFoodFormData] = useState<any>({});
 
   // Category Add/Edit modal states
@@ -506,16 +510,61 @@ export function AdminDashboard({
       id: 'food_' + Date.now().toString(36),
       name: { bn: '', en: '' },
       description: { bn: '', en: '' },
-      price: 100,
+      price: 120,
+      compareAtPrice: '',
       categoryId: categoriesList[0]?.id || 'doi_chira',
       image: '/images/doi_chira.jpg',
       isAvailable: true,
+      isBestseller: false,
+      isNew: true,
+      isFeatured: false,
+      prepTime: '১০-১৫ মিনিট',
     });
     setIsAddingFood(true);
   };
 
   const handleSaveFoodForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSavingFood) return;
+
+    const bnName = foodFormData.name?.bn?.trim();
+    if (!bnName) {
+      showToast('অনুগ্রহ করে খাবারের বাংলা নাম লিখুন');
+      return;
+    }
+
+    const priceNum = Number(foodFormData.price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      showToast('অনুগ্রহ করে সঠিক মূল্য (টাকা) নির্ধারণ করুন');
+      return;
+    }
+
+    const enName = foodFormData.name?.en?.trim() || bnName;
+    const preparedData = {
+      ...foodFormData,
+      name: {
+        bn: bnName,
+        en: enName,
+      },
+      description: {
+        bn: foodFormData.description?.bn?.trim() || '',
+        en: foodFormData.description?.en?.trim() || '',
+      },
+      price: priceNum,
+      compareAtPrice:
+        foodFormData.compareAtPrice && Number(foodFormData.compareAtPrice) > 0
+          ? Number(foodFormData.compareAtPrice)
+          : undefined,
+      categoryId: foodFormData.categoryId || (categoriesList[0]?.id || 'doi_chira'),
+      image: foodFormData.image || '/images/doi_chira.jpg',
+      isAvailable: foodFormData.isAvailable !== undefined ? Boolean(foodFormData.isAvailable) : true,
+      isBestseller: Boolean(foodFormData.isBestseller),
+      isNew: Boolean(foodFormData.isNew),
+      isFeatured: Boolean(foodFormData.isFeatured),
+      prepTime: foodFormData.prepTime?.trim() || '১০-১৫ মিনিট',
+    };
+
+    setIsSavingFood(true);
     try {
       const method = isEditingFood ? 'PUT' : 'POST';
       const res = await fetch('/api/admin/menu', {
@@ -523,18 +572,33 @@ export function AdminDashboard({
         headers: getAdminHeaders(),
         body: JSON.stringify({
           type: 'food',
-          data: foodFormData,
+          data: preparedData,
         }),
       });
+
+      const resData = await res.json().catch(() => ({}));
+
       if (res.ok) {
-        showToast(isEditingFood ? 'খাবার আপডেট হয়েছে' : 'নতুন খাবার যোগ করা হয়েছে');
+        const savedItem: FoodItem = resData.item || preparedData;
+        if (isEditingFood) {
+          setFoodsList((prev) => prev.map((f) => (f.id === savedItem.id ? savedItem : f)));
+          showToast('খাবারের তথ্য সফলভাবে আপডেট হয়েছে!');
+        } else {
+          setFoodsList((prev) => [savedItem, ...prev]);
+          showToast('নতুন খাবার মেনুতে সফলভাবে সংরক্ষণ করা হয়েছে!');
+        }
         setIsEditingFood(null);
         setIsAddingFood(false);
         fetchAdminData();
         refreshMenuData();
+      } else {
+        showToast(resData.error || 'খাবার সংরক্ষণ ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
       }
-    } catch {
-      showToast('সংরক্ষণ ব্যর্থ হয়েছে');
+    } catch (err) {
+      console.error('Error saving food item:', err);
+      showToast('সার্ভারের সাথে সংযোগ পাওয়া যায়নি। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।');
+    } finally {
+      setIsSavingFood(false);
     }
   };
 
@@ -591,10 +655,12 @@ export function AdminDashboard({
 
   const handleSaveCategoryForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!categoryFormData.name?.bn) {
+    const bnName = categoryFormData.name?.bn?.trim();
+    if (!bnName) {
       showToast('ক্যাটাগরির বাংলা নাম আবশ্যক');
       return;
     }
+    const enName = categoryFormData.name?.en?.trim() || bnName;
     try {
       const method = isEditingCategory ? 'PUT' : 'POST';
       const res = await fetch('/api/admin/menu', {
@@ -602,20 +668,24 @@ export function AdminDashboard({
         headers: getAdminHeaders(),
         body: JSON.stringify({
           type: 'category',
-          data: categoryFormData,
+          data: {
+            ...categoryFormData,
+            name: { bn: bnName, en: enName },
+          },
         }),
       });
+      const resData = await res.json().catch(() => ({}));
       if (res.ok) {
-        showToast(isEditingCategory ? 'ক্যাটাগরি আপডেট হয়েছে' : 'নতুন ক্যাটাগরি তৈরি হয়েছে');
+        showToast(isEditingCategory ? 'ক্যাটাগরি সফলভাবে আপডেট হয়েছে' : 'নতুন ক্যাটাগরি তৈরি হয়েছে');
         setIsEditingCategory(null);
         setIsAddingCategory(false);
         fetchAdminData();
         refreshMenuData();
       } else {
-        showToast('সংরক্ষণ ব্যর্থ হয়েছে');
+        showToast(resData.error || 'ক্যাটাগরি সংরক্ষণ ব্যর্থ হয়েছে');
       }
     } catch {
-      showToast('সার্ভার এরর');
+      showToast('সার্ভার এরর: ইন্টারনেট কানেকশন চেক করুন');
     }
   };
 
@@ -2407,17 +2477,36 @@ export function AdminDashboard({
       {/* Food Edit / Add Modal */}
       {(isAddingFood || isEditingFood) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="font-extrabold text-base text-stone-900">
-              {isEditingFood ? 'খাবার সম্পাদনা করুন' : 'নতুন খাবার যোগ করুন'}
-            </h3>
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-black text-base text-stone-900 flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-[#0B5D3B]" />
+                <span>{isEditingFood ? 'খাবার সম্পাদনা করুন' : 'নতুন খাবার যোগ করুন'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isSavingFood) {
+                    setIsAddingFood(false);
+                    setIsEditingFood(null);
+                  }
+                }}
+                disabled={isSavingFood}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all cursor-pointer"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
 
-            <form onSubmit={handleSaveFoodForm} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveFoodForm} className="space-y-3.5 text-xs">
               <div>
-                <label className="font-bold block mb-1">খাবারের নাম (বাংলা) *</label>
+                <label className="font-bold text-stone-800 block mb-1">
+                  খাবারের নাম (বাংলা) <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   required
+                  placeholder="যেমন: স্পেশাল দই চিড়া বা মিষ্টি দই"
                   value={foodFormData.name?.bn || ''}
                   onChange={(e) =>
                     setFoodFormData({
@@ -2425,15 +2514,18 @@ export function AdminDashboard({
                       name: { ...foodFormData.name, bn: e.target.value },
                     })
                   }
-                  className="w-full p-2.5 rounded-xl border border-stone-200"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:border-[#0B5D3B] focus:ring-1 focus:ring-[#0B5D3B] outline-hidden text-xs"
                 />
               </div>
 
               <div>
-                <label className="font-bold block mb-1">খাবারের নাম (English) *</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-stone-700">খাবারের নাম (English)</label>
+                  <span className="text-[10px] text-stone-400 font-normal">ঐচ্ছিক (খালি রাখলে বাংলা নাম ব্যবহৃত হবে)</span>
+                </div>
                 <input
                   type="text"
-                  required
+                  placeholder="e.g. Special Doi Chira"
                   value={foodFormData.name?.en || ''}
                   onChange={(e) =>
                     setFoodFormData({
@@ -2441,28 +2533,58 @@ export function AdminDashboard({
                       name: { ...foodFormData.name, en: e.target.value },
                     })
                   }
-                  className="w-full p-2.5 rounded-xl border border-stone-200"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:border-[#0B5D3B] outline-hidden text-xs"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold block mb-1">মূল্য (টাকা) *</label>
+                  <label className="font-bold text-stone-800 block mb-1">
+                    বিক্রয় মূল্য (টাকা) <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="number"
                     required
-                    value={foodFormData.price || 0}
-                    onChange={(e) => setFoodFormData({ ...foodFormData, price: Number(e.target.value) })}
-                    className="w-full p-2.5 rounded-xl border border-stone-200"
+                    min="1"
+                    placeholder="যেমন: ১২০"
+                    value={foodFormData.price !== undefined && foodFormData.price !== null ? foodFormData.price : ''}
+                    onChange={(e) =>
+                      setFoodFormData({
+                        ...foodFormData,
+                        price: e.target.value === '' ? '' : Number(e.target.value),
+                      })
+                    }
+                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:border-[#0B5D3B] outline-hidden text-xs font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label className="font-bold block mb-1">ক্যাটাগরি</label>
+                  <label className="font-bold text-stone-700 block mb-1">
+                    পূর্বের মূল্য / ডিসকাউন্ট (ঐচ্ছিক)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="যেমন: ১৫০ (কাটা মূল্য)"
+                    value={foodFormData.compareAtPrice || ''}
+                    onChange={(e) =>
+                      setFoodFormData({
+                        ...foodFormData,
+                        compareAtPrice: e.target.value === '' ? '' : Number(e.target.value),
+                      })
+                    }
+                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:border-[#0B5D3B] outline-hidden text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-stone-800 block mb-1">ক্যাটাগরি</label>
                   <select
-                    value={foodFormData.categoryId || 'doi_chira'}
+                    value={foodFormData.categoryId || (categoriesList[0]?.id || 'doi_chira')}
                     onChange={(e) => setFoodFormData({ ...foodFormData, categoryId: e.target.value })}
-                    className="w-full p-2.5 rounded-xl border border-stone-200 bg-white"
+                    className="w-full p-2.5 rounded-xl border border-stone-200 bg-white focus:border-[#0B5D3B] outline-hidden text-xs font-medium"
                   >
                     {categoriesList.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -2470,6 +2592,59 @@ export function AdminDashboard({
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="font-bold text-stone-700 block mb-1">প্রস্তুতি সময়</label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: ১০-১৫ মিনিট"
+                    value={foodFormData.prepTime || '১০ মিনিট'}
+                    onChange={(e) => setFoodFormData({ ...foodFormData, prepTime: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:border-[#0B5D3B] outline-hidden text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Status and badges */}
+              <div className="bg-stone-50 p-3 rounded-2xl border border-stone-200/80 space-y-2">
+                <span className="text-[11px] font-bold text-stone-600 block">ব্যাজ ও প্রাপ্যতা সেটিংস:</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <label className="flex items-center gap-1.5 p-2 bg-white rounded-xl border border-stone-200 cursor-pointer hover:border-emerald-300">
+                    <input
+                      type="checkbox"
+                      checked={foodFormData.isAvailable !== false}
+                      onChange={(e) => setFoodFormData({ ...foodFormData, isAvailable: e.target.checked })}
+                      className="w-3.5 h-3.5 accent-[#0B5D3B]"
+                    />
+                    <span className="text-[11px] font-bold text-stone-800">স্টক আছে</span>
+                  </label>
+
+                  <label className="flex items-center gap-1.5 p-2 bg-white rounded-xl border border-stone-200 cursor-pointer hover:border-amber-300">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(foodFormData.isBestseller)}
+                      onChange={(e) => setFoodFormData({ ...foodFormData, isBestseller: e.target.checked })}
+                      className="w-3.5 h-3.5 accent-amber-600"
+                    />
+                    <span className="text-[11px] font-bold text-stone-800 flex items-center gap-1">
+                      <Flame className="w-3 h-3 text-amber-500" />
+                      <span>বেস্টসেলার</span>
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-1.5 p-2 bg-white rounded-xl border border-stone-200 cursor-pointer hover:border-emerald-300">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(foodFormData.isNew)}
+                      onChange={(e) => setFoodFormData({ ...foodFormData, isNew: e.target.checked })}
+                      className="w-3.5 h-3.5 accent-[#0B5D3B]"
+                    />
+                    <span className="text-[11px] font-bold text-stone-800 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>নতুন পদ</span>
+                    </span>
+                  </label>
                 </div>
               </div>
 
@@ -2481,9 +2656,10 @@ export function AdminDashboard({
               />
 
               <div>
-                <label className="font-bold block mb-1">বিবরণ (বাংলা)</label>
+                <label className="font-bold text-stone-800 block mb-1">বিবরণ (বাংলা)</label>
                 <textarea
                   rows={2}
+                  placeholder="খাবারের বিশেষ উপাদান বা স্বাদ সম্পর্কে লিখুন..."
                   value={foodFormData.description?.bn || ''}
                   onChange={(e) =>
                     setFoodFormData({
@@ -2491,7 +2667,7 @@ export function AdminDashboard({
                       description: { ...foodFormData.description, bn: e.target.value },
                     })
                   }
-                  className="w-full p-2.5 rounded-xl border border-stone-200"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:border-[#0B5D3B] outline-hidden text-xs"
                 />
               </div>
 
@@ -2500,7 +2676,8 @@ export function AdminDashboard({
                   <button
                     type="button"
                     onClick={() => handleDeleteFood(isEditingFood.id, isEditingFood.name?.bn || 'খাবার পদ')}
-                    className="px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-xl font-bold flex items-center gap-1.5 transition-all mr-auto"
+                    disabled={isSavingFood}
+                    className="px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-xl font-bold flex items-center gap-1.5 transition-all mr-auto disabled:opacity-50 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span>মুছে ফেলুন</span>
@@ -2512,15 +2689,27 @@ export function AdminDashboard({
                     setIsAddingFood(false);
                     setIsEditingFood(null);
                   }}
-                  className="px-4 py-2 border rounded-xl text-stone-600 font-bold hover:bg-stone-50"
+                  disabled={isSavingFood}
+                  className="px-4 py-2 border rounded-xl text-stone-600 font-bold hover:bg-stone-50 disabled:opacity-50 cursor-pointer"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#0B5D3B] text-white rounded-xl font-bold shadow-xs hover:bg-[#08482E]"
+                  disabled={isSavingFood}
+                  className="px-6 py-2.5 bg-[#0B5D3B] hover:bg-[#08482E] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  সংরক্ষণ করুন
+                  {isSavingFood ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <span>সংরক্ষণ হচ্ছে...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 text-white" />
+                      <span>{isEditingFood ? 'খাবার আপডেট করুন' : 'খাবার সংরক্ষণ করুন'}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

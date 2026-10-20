@@ -39,11 +39,11 @@ export function ImageDropzone({
         return;
       }
 
-      // Check size. If larger than 800KB, resize smoothly using canvas
+      // Always resize and compress smoothly using canvas to ensure crisp, lightweight images
       const img = new Image();
       img.onload = () => {
-        const maxWidth = 1000;
-        const maxHeight = 1000;
+        const maxWidth = 600;
+        const maxHeight = 600;
         let width = img.width;
         let height = img.height;
 
@@ -53,23 +53,22 @@ export function ImageDropzone({
             width = maxWidth;
           } else {
             width = Math.round((width * maxHeight) / height);
-            maxHeight;
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const compressed = canvas.toDataURL('image/jpeg', 0.85);
-            onChange(compressed);
-            setIsProcessing(false);
-            return;
+            height = maxHeight;
           }
         }
 
-        // Under size limit or resize not needed
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.72);
+          onChange(compressed);
+          setIsProcessing(false);
+          return;
+        }
+
         onChange(result);
         setIsProcessing(false);
       };

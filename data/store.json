@@ -1,151 +1,219 @@
 {
   "categories": [
     {
-      "isActive": true,
       "name": {
         "en": "Doi Chira",
         "bn": "দই চিড়া"
       },
-      "icon": "Utensils",
       "sortOrder": 1,
-      "id": "doi_chira"
+      "isActive": true,
+      "id": "doi_chira",
+      "icon": "Utensils"
     },
     {
+      "isActive": true,
       "icon": "Flame",
       "name": {
         "bn": "নাচোস",
         "en": "Nachos"
       },
       "id": "nachos",
-      "sortOrder": 2,
-      "isActive": true
+      "sortOrder": 2
     },
     {
+      "sortOrder": 3,
       "icon": "Soup",
+      "isActive": true,
+      "id": "chowmein",
       "name": {
         "en": "Chow Mein",
         "bn": "চাউমিন"
-      },
-      "isActive": true,
-      "sortOrder": 3,
-      "id": "chowmein"
+      }
     },
     {
+      "icon": "CookingPot",
+      "id": "pasta",
       "name": {
         "en": "Pasta",
         "bn": "পাস্তা"
       },
-      "icon": "CookingPot",
-      "isActive": true,
       "sortOrder": 4,
-      "id": "pasta"
-    },
-    {
-      "id": "burger",
-      "icon": "Sandwich",
-      "name": {
-        "bn": "বার্গার",
-        "en": "Burgers"
-      },
-      "isActive": true,
-      "sortOrder": 5
-    },
-    {
-      "id": "chicken_fries",
-      "sortOrder": 6,
-      "name": {
-        "bn": "চিকেন ও ফ্রাইস",
-        "en": "Chicken & Fries"
-      },
-      "icon": "Drumstick",
       "isActive": true
     },
     {
-      "sortOrder": 7,
-      "icon": "Coffee",
       "name": {
         "en": "Drinks & Cold Coffee",
         "bn": "ড্রিঙ্কস ও কোল্ড কফি"
       },
+      "id": "drinks",
       "isActive": true,
-      "id": "drinks"
+      "sortOrder": 7,
+      "icon": "Coffee"
     }
   ],
-  "foods": [],
+  "foods": [
+    {
+      "name": {
+        "bn": "স্পেশাল শাহী মিষ্টি দই"
+      },
+      "isBestseller": true,
+      "image": "/images/doi_chira.jpg",
+      "isAvailable": true,
+      "addOns": [],
+      "id": "food_1792493549340",
+      "sortOrder": 4,
+      "categoryId": "doi_chira",
+      "description": {
+        "en": "",
+        "bn": ""
+      },
+      "price": 140,
+      "isFeatured": false,
+      "isNew": true,
+      "prepTime": "১০ মিনিট",
+      "portionVariants": []
+    },
+    {
+      "isAvailable": true,
+      "addOns": [],
+      "isFeatured": false,
+      "categoryId": "doi_chira",
+      "image": "/images/doi_chira.jpg",
+      "name": {
+        "en": "Test Food",
+        "bn": "টেস্ট খাবার"
+      },
+      "portionVariants": [],
+      "id": "food_test123",
+      "isBestseller": false,
+      "description": {
+        "en": "",
+        "bn": "টেস্ট বিবরণ"
+      },
+      "isNew": false,
+      "price": 120,
+      "prepTime": "১০ মিনিট",
+      "sortOrder": 3
+    },
+    {
+      "id": "food_1792492934175",
+      "name": {
+        "en": "Special Doi Chira Bowl",
+        "bn": "স্পেশাল দই চিড়া বাটি"
+      },
+      "isAvailable": true,
+      "isNew": false,
+      "isBestseller": false,
+      "price": 180,
+      "description": {
+        "en": "",
+        "bn": ""
+      },
+      "prepTime": "১০ মিনিট",
+      "isFeatured": false,
+      "categoryId": "doi_chira",
+      "sortOrder": 2,
+      "addOns": [],
+      "portionVariants": [],
+      "image": "/images/doi_chira.jpg"
+    },
+    {
+      "sortOrder": 1,
+      "categoryId": "doi_chira",
+      "isAvailable": true,
+      "isFeatured": false,
+      "name": {
+        "en": "Test Doi Chira Special",
+        "bn": "টেস্ট দই চিড়া স্পেশাল"
+      },
+      "isBestseller": false,
+      "prepTime": "১০ মিনিট",
+      "isNew": false,
+      "portionVariants": [],
+      "price": 150,
+      "addOns": [],
+      "description": {
+        "en": "",
+        "bn": ""
+      },
+      "id": "food_1792492890930",
+      "image": "/images/doi_chira.jpg"
+    }
+  ],
   "offers": [
     {
-      "id": "off_burger50",
-      "validTill": "2026-12-31",
       "description": {
         "bn": "৩০০ টাকার বেশি খাবারে ফ্ল্যাট ৫০ টাকা ক্যাশ ছাড়।",
         "en": "Flat 50 BDT discount on meal orders above 300 BDT."
       },
       "discountValue": 50,
-      "discountType": "fixed",
+      "minOrder": 300,
       "isActive": true,
+      "code": "BURGER50",
+      "validTill": "2026-12-31",
+      "id": "off_burger50",
       "title": {
         "en": "50 BDT Off on Burgers",
         "bn": "বার্গার কম্বো ৫০৳ ছাড়"
       },
-      "minOrder": 300,
-      "code": "BURGER50"
+      "discountType": "fixed"
     },
     {
-      "maxDiscount": 40,
-      "isActive": true,
+      "minOrder": 150,
+      "discountType": "percentage",
       "id": "off_welcome10",
-      "validTill": "2026-12-31",
+      "isActive": true,
+      "discountValue": 10,
+      "maxDiscount": 40,
       "description": {
         "bn": "যেকোনো ১৫০ টাকার অর্ডারে ১০% মূল্যছাড় উপভোগ করুন।",
         "en": "Enjoy 10% off on any order of 150 BDT or more."
       },
-      "minOrder": 150,
-      "discountType": "percentage",
+      "code": "BENAPOLE10",
+      "validTill": "2026-12-31",
       "title": {
         "bn": "নতুন গ্রাহক ১০% ছাড়",
         "en": "Welcome 10% Discount"
-      },
-      "code": "BENAPOLE10",
-      "discountValue": 10
+      }
     },
     {
-      "isActive": true,
       "discountValue": 101,
-      "minOrder": 10,
       "discountType": "fixed",
-      "validTill": "2026-10-12",
       "description": {
         "bn": "সকল খাবারে প্রযোজ্য",
         "en": "Valid on all items"
       },
+      "validTill": "2026-10-12",
+      "code": "SPECIAL45",
       "title": {
         "en": "Special Discount",
         "bn": "বিশেষ মূল্যছাড়"
       },
-      "code": "SPECIAL45",
-      "id": "off_1791716030852"
+      "id": "off_1791716030852",
+      "isActive": true,
+      "minOrder": 10
     }
   ],
   "orders": [],
   "settings": {
     "restaurantName": {
-      "bn": "বেনাপোল স্পেশাল",
-      "en": "Benapole Special"
+      "en": "Benapole Special",
+      "bn": "বেনাপোল স্পেশাল"
     },
     "tagline": {
-      "bn": "স্বাদে ঐতিহ্য, মনে ভালোবাসা",
-      "en": "Taste • Freshness • Happiness"
+      "en": "Taste • Freshness • Happiness",
+      "bn": "স্বাদে ঐতিহ্য, মনে ভালোবাসা"
     },
     "phone": "01878777341",
     "email": "benapolespecial@gmail.com",
     "address": {
-      "en": "Benapole Nitya Haat (Mayor Market), Parking Area, Behind Dhaka Biriyani House, Benapole, Sharsha, Jashore",
-      "bn": "বেনাপোল নিত্য হাট (মেয়র মার্কেট), পার্কিং এরিয়া, ঢাকা বিরিয়ানি হাউজ এর পেছনে, বেনাপোল, শার্শা, যশোর"
+      "bn": "বেনাপোল নিত্য হাট (মেয়র মার্কেট), পার্কিং এরিয়া, ঢাকা বিরিয়ানি হাউজ এর পেছনে, বেনাপোল, শার্শা, যশোর",
+      "en": "Benapole Nitya Haat (Mayor Market), Parking Area, Behind Dhaka Biriyani House, Benapole, Sharsha, Jashore"
     },
     "mapUrl": "https://maps.app.goo.gl/XE34ykXBwjMPAH9L9?g_st=ac",
     "openingHours": {
-      "bn": "সকাল ১০:০০ টা - রাত ১১:০০ টা (সপ্তাহের ৭ দিন খোলা)",
-      "en": "10:00 AM - 11:00 PM (Open 7 Days a week)"
+      "en": "10:00 AM - 11:00 PM (Open 7 Days a week)",
+      "bn": "সকাল ১০:০০ টা - রাত ১১:০০ টা (সপ্তাহের ৭ দিন খোলা)"
     },
     "facebookUrl": "https://facebook.com/benapolespecial",
     "deliveryFee": 30,
@@ -155,123 +223,91 @@
     "estimatedPickupMinutes": "১৫ - ২০ মিনিট",
     "isOpen": true,
     "paymentConfig": {
-      "cod": {
-        "instructions": {
-          "en": "Pay cash to the delivery rider upon receiving your food order.",
-          "bn": "খাবার হাতে পেয়ে ডেলিভারি ম্যানকে নগদ টাকা পরিশোধ করুন।"
-        },
-        "enabled": true,
-        "label": {
-          "bn": "ক্যাশ অন ডেলিভারি (হাতে পেয়ে টাকা)",
-          "en": "Cash on Delivery (COD)"
-        }
-      },
       "nagad": {
+        "number": "01302231925",
         "enabled": true,
-        "type": "Personal (Send Money)",
         "instructions": {
-          "en": "Send money to our Nagad personal number and enter your Transaction ID.",
-          "bn": "নগদ পার্সোনাল নম্বরে সেন্ড মানি করে ট্রানজেকশন আইডি (TrxID) দিন।"
+          "bn": "নগদ পার্সোনাল নম্বরে সেন্ড মানি করে ট্রানজেকশন আইডি (TrxID) দিন।",
+          "en": "Send money to our Nagad personal number and enter your Transaction ID."
         },
-        "number": "01302231925"
-      },
-      "rocket": {
-        "enabled": true,
-        "number": "013022319258",
-        "type": "Personal (Send Money)",
-        "instructions": {
-          "en": "Send money to our Rocket personal number and enter your Transaction ID.",
-          "bn": "রকেট পার্সোনাল নম্বরে সেন্ড মানি করে ট্রানজেকশন আইডি (TrxID) দিন।"
-        }
+        "type": "Personal (Send Money)"
       },
       "bkash": {
-        "type": "Personal (Send Money)",
         "enabled": true,
+        "type": "Personal (Send Money)",
+        "number": "01302231925",
         "instructions": {
-          "en": "Send money to our bKash personal number and enter your Transaction ID.",
-          "bn": "বিকাশ পার্সোনাল নম্বরে \"Send Money\" করুন এবং ট্রানজেকশন আইডি (TrxID) প্রদান করুন।"
+          "bn": "বিকাশ পার্সোনাল নম্বরে \"Send Money\" করুন এবং ট্রানজেকশন আইডি (TrxID) প্রদান করুন।",
+          "en": "Send money to our bKash personal number and enter your Transaction ID."
+        }
+      },
+      "rocket": {
+        "instructions": {
+          "bn": "রকেট পার্সোনাল নম্বরে সেন্ড মানি করে ট্রানজেকশন আইডি (TrxID) দিন।",
+          "en": "Send money to our Rocket personal number and enter your Transaction ID."
         },
-        "number": "01302231925"
+        "type": "Personal (Send Money)",
+        "number": "013022319258",
+        "enabled": true
       },
       "pickupCash": {
-        "instructions": {
-          "en": "Pay at the restaurant counter when collecting your order.",
-          "bn": "রেস্টুরেন্ট কাউন্টারে খাবার সংগ্রহের সময় টাকা পরিশোধ করুন।"
-        },
+        "enabled": true,
         "label": {
-          "bn": "রেস্টুরেন্টে গিয়ে পরিশোধ (পিকআপ)",
-          "en": "Pay at Counter (Pickup)"
+          "en": "Pay at Counter (Pickup)",
+          "bn": "রেস্টুরেন্টে গিয়ে পরিশোধ (পিকআপ)"
+        },
+        "instructions": {
+          "bn": "রেস্টুরেন্ট কাউন্টারে খাবার সংগ্রহের সময় টাকা পরিশোধ করুন।",
+          "en": "Pay at the restaurant counter when collecting your order."
+        }
+      },
+      "cod": {
+        "label": {
+          "en": "Cash on Delivery (COD)",
+          "bn": "ক্যাশ অন ডেলিভারি (হাতে পেয়ে টাকা)"
+        },
+        "instructions": {
+          "bn": "খাবার হাতে পেয়ে ডেলিভারি ম্যানকে নগদ টাকা পরিশোধ করুন।",
+          "en": "Pay cash to the delivery rider upon receiving your food order."
         },
         "enabled": true
       }
     },
     "telegramConfig": {
-      "enabled": true,
       "botToken": "7894322004:AAHb2myAIM1Nk8qBl20c4m7dL7Qfi8_ML9Y",
-      "notifyOnStatusChange": true,
       "chatId": "1958884768",
+      "enabled": true,
+      "notifyOnStatusChange": true,
       "notifyOnNewOrder": true
     },
-    "deliveryAreas": [],
+    "deliveryAreas": [
+      {
+        "coordinates": {
+          "lng": 88.8983,
+          "lat": 23.0441
+        },
+        "name": {
+          "en": "Benapole",
+          "bn": "Benapole"
+        },
+        "id": "area_mvar7cz6",
+        "landmark": "Hi",
+        "fee": 10,
+        "isPopular": true
+      }
+    ],
     "isOrderAccepting": true,
     "openingTime": "10:00",
     "closingTime": "23:00",
     "plusCode": "2WW3+FG7 Benapole",
     "coordinates": {
-      "lat": 23.046345,
-      "lng": 88.90387
+      "lng": 88.90387,
+      "lat": 23.046345
     },
-    "updatedAt": "2026-10-16T09:16:41.496Z"
+    "updatedAt": "2026-10-16T09:17:28.829Z"
   },
   "draftTheme": {
     "sections": {
-      "header": {
-        "enabled": true,
-        "showLanguageSwitch": true,
-        "showSearch": true
-      },
-      "benefits": {
-        "items": [
-          {
-            "desc": {
-              "en": "Zero artificial flavors or chemicals",
-              "bn": "কোনো কৃত্রিম গন্ধ বা ক্ষতিকর রঙ নেই"
-            },
-            "icon": "Sparkles",
-            "title": {
-              "en": "100% Pure & Fresh Ingredients",
-              "bn": "১০০% খাঁটি ও তাজা উপকরণ"
-            }
-          },
-          {
-            "desc": {
-              "en": "Direct to your door across Benapole",
-              "bn": "বেনাপোল শহর ও আশেপাশের এলাকায় সরাসরি পৌঁছায়"
-            },
-            "icon": "Bike",
-            "title": {
-              "en": "Superfast Warm Delivery",
-              "bn": "দ্রুততম গরম গরম ডেলিভারি"
-            }
-          },
-          {
-            "title": {
-              "en": "Convenient Cash & Mobile Pay",
-              "bn": "সহজ ও নিরাপদ পেমেন্ট"
-            },
-            "icon": "ShieldCheck",
-            "desc": {
-              "en": "Cash on delivery, bKash & Nagad supported",
-              "bn": "ক্যাশ অন ডেলিভারি ও বিকাশ/নগদ সুবিধা"
-            }
-          }
-        ],
-        "title": {
-          "en": "Why Choose Benapole Special?",
-          "bn": "কেন বেনাপোল স্পেশাল সেরা?"
-        },
-        "enabled": true
-      },
       "featuredFoods": {
         "subtitle": {
           "en": "Hand-picked customer favorites prepared fresh to order",
@@ -279,48 +315,60 @@
         },
         "enabled": true,
         "title": {
-          "bn": "জনপ্রিয় ও স্পেশাল খাবার",
-          "en": "Bestsellers & Special Items"
+          "en": "Bestsellers & Special Items",
+          "bn": "জনপ্রিয় ও স্পেশাল খাবার"
         }
       },
-      "contactLocation": {
-        "title": {
-          "bn": "যোগাযোগ ও লোকেশন",
-          "en": "Contact & Location"
-        },
+      "header": {
+        "showLanguageSwitch": true,
+        "showSearch": true,
         "enabled": true
+      },
+      "hero": {
+        "headline": {
+          "bn": "বেনাপোল স্পেশাল দই চিড়া — এখন অনলাইনে!",
+          "en": "Benapole Special Doi Chira — Now Online!"
+        },
+        "backgroundImage": "/images/doi_chira.jpg",
+        "subheading": {
+          "en": "Authentic taste in every bowl. Rich sweet curd, premium nuts & raisins. Order fresh to your doorstep!",
+          "bn": "এক বাটিতে স্বাদে ঐতিহ্য, সেরা খাঁটি মিষ্টি দই আর প্রিমিয়াম বাদাম-কিশমিশ। ঘরে বসেই অর্ডার করুন!"
+        },
+        "enabled": true,
+        "badgeText": {
+          "en": "🔥 Benapole’s #1 Authentic Signature Delight",
+          "bn": "🔥 বেনাপোলের খাবার"
+        },
+        "ctaText": {
+          "bn": "অর্ডার করুন এখনই →",
+          "en": "Order Fresh Now →"
+        }
       },
       "categories": {
         "enabled": true,
         "title": {
-          "bn": "খাবারের ক্যাটাগরি",
-          "en": "Explore Menu Categories"
+          "en": "Explore Menu Categories",
+          "bn": "খাবারের ক্যাটাগরি"
         }
       },
-      "hero": {
-        "badgeText": {
-          "bn": "🔥 বেনাপোলের খাবার",
-          "en": "🔥 Benapole’s #1 Authentic Signature Delight"
-        },
+      "footer": {
         "enabled": true,
-        "backgroundImage": "/images/doi_chira.jpg",
-        "ctaText": {
-          "bn": "অর্ডার করুন এখনই →",
-          "en": "Order Fresh Now →"
-        },
-        "headline": {
-          "en": "Benapole Special Doi Chira — Now Online!",
-          "bn": "বেনাপোল স্পেশাল দই চিড়া — এখন অনলাইনে!"
-        },
-        "subheading": {
-          "en": "Authentic taste in every bowl. Rich sweet curd, premium nuts & raisins. Order fresh to your doorstep!",
-          "bn": "এক বাটিতে স্বাদে ঐতিহ্য, সেরা খাঁটি মিষ্টি দই আর প্রিমিয়াম বাদাম-কিশমিশ। ঘরে বসেই অর্ডার করুন!"
+        "copyrightText": {
+          "en": "© 2026 Benapole Special. All rights reserved.",
+          "bn": "© ২০২৬ বেনাপোল স্পেশাল। সর্বস্বত্ব সংরক্ষিত।"
         }
+      },
+      "contactLocation": {
+        "title": {
+          "en": "Contact & Location",
+          "bn": "যোগাযোগ ও লোকেশন"
+        },
+        "enabled": true
       },
       "gallery": {
         "title": {
-          "en": "Restaurant Moments & Atmosphere",
-          "bn": "রেস্টুরেন্টের ফটো গ্যালারি"
+          "bn": "রেস্টুরেন্টের ফটো গ্যালারি",
+          "en": "Restaurant Moments & Atmosphere"
         },
         "enabled": true,
         "images": [
@@ -331,106 +379,140 @@
           "/images/restaurant_interior.jpg"
         ]
       },
-      "footer": {
-        "copyrightText": {
-          "bn": "© ২০২৬ বেনাপোল স্পেশাল। সর্বস্বত্ব সংরক্ষিত।",
-          "en": "© 2026 Benapole Special. All rights reserved."
-        },
-        "enabled": true
-      },
-      "about": {
-        "features": [
-          {
-            "en": "Natural & wholesome nutrition",
-            "bn": "প্রাকৃতিক ও পুষ্টিকর উপাদান"
-          },
-          {
-            "bn": "পরিষ্কার-পরিচ্ছন্ন স্বাস্থ্যকর কিচেন",
-            "en": "Clean & certified hygienic preparation"
-          },
-          {
-            "bn": "পরিবার ও বন্ধুদের সাথে বসার চমৎকার পরিবেশ",
-            "en": "Warm ambiance for families and friends"
-          }
-        ],
-        "title": {
-          "bn": "আমাদের ঐতিহ্যের গল্প",
-          "en": "Our Story & Tradition"
-        },
-        "image": "/images/restaurant_interior.jpg",
-        "story": {
-          "en": "Benapole Special was founded with a passion to bring pure, hygienic, and deliciously traditional Doi Chira and artisan fast foods to food lovers. Every bowl is made with authentic love and culinary craftsmanship.",
-          "bn": "বেনাপোল স্পেশাল শুরু হয়েছিল সাধারণ একটি ভালোবাসার স্বপ্ন থেকে—বেনাপোলের মানুষকে খাঁটি, স্বাস্থ্যকর এবং অতুলনীয় স্বাদের স্পেশাল দই চিড়া ও ফাস্টফুড উপহার দেওয়া। প্রতিটি বাটিতে আমরা দিই নিখাদ যত্ন আর আন্তরিকতা।"
-        },
-        "enabled": true
-      },
       "offers": {
         "enabled": true,
         "title": {
           "en": "Today’s Special Offers & Coupons",
           "bn": "আজকের বিশেষ অফার ও ছাড়"
         }
+      },
+      "about": {
+        "image": "/images/restaurant_interior.jpg",
+        "story": {
+          "bn": "বেনাপোল স্পেশাল শুরু হয়েছিল সাধারণ একটি ভালোবাসার স্বপ্ন থেকে—বেনাপোলের মানুষকে খাঁটি, স্বাস্থ্যকর এবং অতুলনীয় স্বাদের স্পেশাল দই চিড়া ও ফাস্টফুড উপহার দেওয়া। প্রতিটি বাটিতে আমরা দিই নিখাদ যত্ন আর আন্তরিকতা।",
+          "en": "Benapole Special was founded with a passion to bring pure, hygienic, and deliciously traditional Doi Chira and artisan fast foods to food lovers. Every bowl is made with authentic love and culinary craftsmanship."
+        },
+        "title": {
+          "bn": "আমাদের ঐতিহ্যের গল্প",
+          "en": "Our Story & Tradition"
+        },
+        "enabled": true,
+        "features": [
+          {
+            "en": "Natural & wholesome nutrition",
+            "bn": "প্রাকৃতিক ও পুষ্টিকর উপাদান"
+          },
+          {
+            "en": "Clean & certified hygienic preparation",
+            "bn": "পরিষ্কার-পরিচ্ছন্ন স্বাস্থ্যকর কিচেন"
+          },
+          {
+            "bn": "পরিবার ও বন্ধুদের সাথে বসার চমৎকার পরিবেশ",
+            "en": "Warm ambiance for families and friends"
+          }
+        ]
+      },
+      "benefits": {
+        "title": {
+          "en": "Why Choose Benapole Special?",
+          "bn": "কেন বেনাপোল স্পেশাল সেরা?"
+        },
+        "items": [
+          {
+            "title": {
+              "bn": "১০০% খাঁটি ও তাজা উপকরণ",
+              "en": "100% Pure & Fresh Ingredients"
+            },
+            "desc": {
+              "bn": "কোনো কৃত্রিম গন্ধ বা ক্ষতিকর রঙ নেই",
+              "en": "Zero artificial flavors or chemicals"
+            },
+            "icon": "Sparkles"
+          },
+          {
+            "icon": "Bike",
+            "desc": {
+              "bn": "বেনাপোল শহর ও আশেপাশের এলাকায় সরাসরি পৌঁছায়",
+              "en": "Direct to your door across Benapole"
+            },
+            "title": {
+              "en": "Superfast Warm Delivery",
+              "bn": "দ্রুততম গরম গরম ডেলিভারি"
+            }
+          },
+          {
+            "desc": {
+              "bn": "ক্যাশ অন ডেলিভারি ও বিকাশ/নগদ সুবিধা",
+              "en": "Cash on delivery, bKash & Nagad supported"
+            },
+            "title": {
+              "en": "Convenient Cash & Mobile Pay",
+              "bn": "সহজ ও নিরাপদ পেমেন্ট"
+            },
+            "icon": "ShieldCheck"
+          }
+        ],
+        "enabled": true
       }
     },
-    "publishedAt": "2026-10-11T00:38:13.072Z",
-    "version": 1,
+    "version": 2,
     "colors": {
-      "primary": "#0B5D3B",
-      "background": "#FFFDF7",
-      "textPrimary": "#1F2937",
+      "background": "#ffffff",
+      "primary": "#020d09",
+      "secondary": "#ff8800",
       "surface": "#FFFFFF",
-      "accent": "#F4D05F",
-      "secondary": "#F7931E"
+      "accent": "#cda318",
+      "textPrimary": "#1F2937"
     },
+    "publishedAt": "2026-10-20T10:44:12.113Z",
     "typography": {
       "bodyFont": "Plus Jakarta Sans, sans-serif",
-      "borderRadius": "rounded-2xl",
-      "headingFont": "Outfit, sans-serif"
+      "headingFont": "Outfit, sans-serif",
+      "borderRadius": "rounded-2xl"
     }
   },
   "publishedTheme": {
-    "colors": {
-      "primary": "#0B5D3B",
-      "accent": "#F4D05F",
-      "textPrimary": "#1F2937",
-      "surface": "#FFFFFF",
-      "background": "#FFFDF7",
-      "secondary": "#F7931E"
-    },
     "typography": {
       "headingFont": "Outfit, sans-serif",
-      "bodyFont": "Plus Jakarta Sans, sans-serif",
-      "borderRadius": "rounded-2xl"
+      "borderRadius": "rounded-2xl",
+      "bodyFont": "Plus Jakarta Sans, sans-serif"
     },
-    "version": 1,
-    "publishedAt": "2026-10-11T00:38:13.072Z",
+    "colors": {
+      "surface": "#FFFFFF",
+      "background": "#ffffff",
+      "accent": "#cda318",
+      "textPrimary": "#1F2937",
+      "secondary": "#ff8800",
+      "primary": "#020d09"
+    },
+    "version": 2,
     "sections": {
-      "hero": {
+      "contactLocation": {
         "enabled": true,
-        "backgroundImage": "/images/doi_chira.jpg",
+        "title": {
+          "en": "Contact & Location",
+          "bn": "যোগাযোগ ও লোকেশন"
+        }
+      },
+      "hero": {
+        "ctaText": {
+          "bn": "অর্ডার করুন এখনই →",
+          "en": "Order Fresh Now →"
+        },
         "headline": {
           "bn": "বেনাপোল স্পেশাল দই চিড়া — এখন অনলাইনে!",
           "en": "Benapole Special Doi Chira — Now Online!"
         },
-        "ctaText": {
-          "bn": "অর্ডার করুন এখনই →",
-          "en": "Order Now →"
-        },
+        "enabled": true,
+        "backgroundImage": "/images/doi_chira.jpg",
         "subheading": {
-          "bn": "এক বাটিতে স্বাদে ঐতিহ্য, খাঁটি মিষ্টি দই আর প্রিমিয়াম বাদাম-কিশমিশ। বেনাপোলের যে কোনো প্রান্তে দ্রুত ডেলিভারি!",
-          "en": "Authentic taste in every bowl. Rich sweet curd & premium toppings delivered across Benapole!"
+          "en": "Authentic taste in every bowl. Rich sweet curd, premium nuts & raisins. Order fresh to your doorstep!",
+          "bn": "এক বাটিতে স্বাদে ঐতিহ্য, সেরা খাঁটি মিষ্টি দই আর প্রিমিয়াম বাদাম-কিশমিশ। ঘরে বসেই অর্ডার করুন!"
         },
         "badgeText": {
           "en": "🔥 Benapole’s #1 Authentic Signature Delight",
-          "bn": "🔥 বেনাপোলের সেরা ঐতিহ্যবাহী খাবার"
+          "bn": "🔥 বেনাপোলের খাবার"
         }
-      },
-      "contactLocation": {
-        "title": {
-          "bn": "যোগাযোগ ও লোকেশন",
-          "en": "Contact & Location"
-        },
-        "enabled": true
       },
       "gallery": {
         "images": [
@@ -446,153 +528,421 @@
           "en": "Restaurant Moments & Atmosphere"
         }
       },
-      "offers": {
-        "title": {
-          "bn": "আজকের বিশেষ অফার ও ছাড়",
-          "en": "Today’s Special Offers & Coupons"
-        },
-        "enabled": true
-      },
-      "benefits": {
-        "enabled": true,
-        "title": {
-          "bn": "কেন বেনাপোল স্পেশাল সেরা?",
-          "en": "Why Choose Benapole Special?"
-        },
-        "items": [
-          {
-            "title": {
-              "en": "100% Pure & Fresh Ingredients",
-              "bn": "১০০% খাঁটি ও তাজা উপকরণ"
-            },
-            "icon": "Sparkles",
-            "desc": {
-              "bn": "কোনো কৃত্রিম গন্ধ বা ক্ষতিকর রঙ নেই",
-              "en": "Zero artificial flavors or chemicals"
-            }
-          },
-          {
-            "title": {
-              "bn": "দ্রুততম গরম গরম ডেলিভারি",
-              "en": "Superfast Warm Delivery"
-            },
-            "icon": "Bike",
-            "desc": {
-              "bn": "বেনাপোল শহর ও আশেপাশের এলাকায় সরাসরি পৌঁছায়",
-              "en": "Direct to your door across Benapole"
-            }
-          },
-          {
-            "desc": {
-              "en": "Cash on delivery, bKash & Nagad supported",
-              "bn": "ক্যাশ অন ডেলিভারি ও বিকাশ/নগদ সুবিধা"
-            },
-            "icon": "ShieldCheck",
-            "title": {
-              "bn": "সহজ ও নিরাপদ পেমেন্ট",
-              "en": "Convenient Cash & Mobile Pay"
-            }
-          }
-        ]
-      },
-      "footer": {
-        "copyrightText": {
-          "bn": "© ২০২৬ বেনাপোল স্পেশাল। সর্বস্বত্ব সংরক্ষিত।",
-          "en": "© 2026 Benapole Special. All rights reserved."
-        },
-        "enabled": true
-      },
-      "featuredFoods": {
-        "enabled": true,
-        "title": {
-          "en": "Bestsellers & Special Items",
-          "bn": "জনপ্রিয় ও স্পেশাল খাবার"
-        },
-        "subtitle": {
-          "bn": "আমাদের সবচেয়ে পছন্দের ও চাহিদাসম্পন্ন সুস্বাদু মেনু",
-          "en": "Hand-picked customer favorites prepared fresh to order"
-        }
-      },
       "header": {
         "enabled": true,
         "showSearch": true,
         "showLanguageSwitch": true
       },
-      "about": {
-        "story": {
-          "en": "Benapole Special was founded with a passion to bring pure, hygienic, and deliciously traditional Doi Chira and artisan fast foods to food lovers. Every bowl is made with authentic love and culinary craftsmanship.",
-          "bn": "বেনাপোল স্পেশাল শুরু হয়েছিল সাধারণ একটি ভালোবাসার স্বপ্ন থেকে—বেনাপোলের মানুষকে খাঁটি, স্বাস্থ্যকর এবং অতুলনীয় স্বাদের স্পেশাল দই চিড়া ও ফাস্টফুড উপহার দেওয়া। প্রতিটি বাটিতে আমরা দিই নিখাদ যত্ন আর আন্তরিকতা।"
+      "footer": {
+        "enabled": true,
+        "copyrightText": {
+          "en": "© 2026 Benapole Special. All rights reserved.",
+          "bn": "© ২০২৬ বেনাপোল স্পেশাল। সর্বস্বত্ব সংরক্ষিত।"
+        }
+      },
+      "categories": {
+        "title": {
+          "en": "Explore Menu Categories",
+          "bn": "খাবারের ক্যাটাগরি"
         },
-        "image": "/images/restaurant_interior.jpg",
+        "enabled": true
+      },
+      "offers": {
+        "title": {
+          "en": "Today’s Special Offers & Coupons",
+          "bn": "আজকের বিশেষ অফার ও ছাড়"
+        },
+        "enabled": true
+      },
+      "benefits": {
+        "items": [
+          {
+            "icon": "Sparkles",
+            "desc": {
+              "bn": "কোনো কৃত্রিম গন্ধ বা ক্ষতিকর রঙ নেই",
+              "en": "Zero artificial flavors or chemicals"
+            },
+            "title": {
+              "bn": "১০০% খাঁটি ও তাজা উপকরণ",
+              "en": "100% Pure & Fresh Ingredients"
+            }
+          },
+          {
+            "desc": {
+              "bn": "বেনাপোল শহর ও আশেপাশের এলাকায় সরাসরি পৌঁছায়",
+              "en": "Direct to your door across Benapole"
+            },
+            "icon": "Bike",
+            "title": {
+              "en": "Superfast Warm Delivery",
+              "bn": "দ্রুততম গরম গরম ডেলিভারি"
+            }
+          },
+          {
+            "icon": "ShieldCheck",
+            "desc": {
+              "bn": "ক্যাশ অন ডেলিভারি ও বিকাশ/নগদ সুবিধা",
+              "en": "Cash on delivery, bKash & Nagad supported"
+            },
+            "title": {
+              "en": "Convenient Cash & Mobile Pay",
+              "bn": "সহজ ও নিরাপদ পেমেন্ট"
+            }
+          }
+        ],
+        "title": {
+          "en": "Why Choose Benapole Special?",
+          "bn": "কেন বেনাপোল স্পেশাল সেরা?"
+        },
+        "enabled": true
+      },
+      "about": {
         "features": [
           {
-            "bn": "প্রাকৃতিক ও পুষ্টিকর উপাদান",
-            "en": "Natural & wholesome nutrition"
+            "en": "Natural & wholesome nutrition",
+            "bn": "প্রাকৃতিক ও পুষ্টিকর উপাদান"
           },
           {
             "en": "Clean & certified hygienic preparation",
             "bn": "পরিষ্কার-পরিচ্ছন্ন স্বাস্থ্যকর কিচেন"
           },
           {
-            "en": "Warm ambiance for families and friends",
-            "bn": "পরিবার ও বন্ধুদের সাথে বসার চমৎকার পরিবেশ"
+            "bn": "পরিবার ও বন্ধুদের সাথে বসার চমৎকার পরিবেশ",
+            "en": "Warm ambiance for families and friends"
           }
         ],
+        "image": "/images/restaurant_interior.jpg",
+        "story": {
+          "bn": "বেনাপোল স্পেশাল শুরু হয়েছিল সাধারণ একটি ভালোবাসার স্বপ্ন থেকে—বেনাপোলের মানুষকে খাঁটি, স্বাস্থ্যকর এবং অতুলনীয় স্বাদের স্পেশাল দই চিড়া ও ফাস্টফুড উপহার দেওয়া। প্রতিটি বাটিতে আমরা দিই নিখাদ যত্ন আর আন্তরিকতা।",
+          "en": "Benapole Special was founded with a passion to bring pure, hygienic, and deliciously traditional Doi Chira and artisan fast foods to food lovers. Every bowl is made with authentic love and culinary craftsmanship."
+        },
         "title": {
           "bn": "আমাদের ঐতিহ্যের গল্প",
           "en": "Our Story & Tradition"
         },
         "enabled": true
       },
-      "categories": {
-        "enabled": true,
+      "featuredFoods": {
         "title": {
-          "en": "Explore Menu Categories",
-          "bn": "খাবারের ক্যাটাগরি"
+          "en": "Bestsellers & Special Items",
+          "bn": "জনপ্রিয় ও স্পেশাল খাবার"
+        },
+        "enabled": true,
+        "subtitle": {
+          "en": "Hand-picked customer favorites prepared fresh to order",
+          "bn": "আমাদের সবচেয়ে পছন্দের ও চাহিদাসম্পন্ন সুস্বাদু মেনু"
         }
       }
-    }
+    },
+    "publishedAt": "2026-10-20T10:44:12.113Z"
   },
   "themeHistory": [
     {
       "theme": {
+        "publishedAt": "2026-10-20T10:44:12.113Z",
+        "colors": {
+          "textPrimary": "#1F2937",
+          "primary": "#020d09",
+          "background": "#ffffff",
+          "surface": "#FFFFFF",
+          "secondary": "#ff8800",
+          "accent": "#cda318"
+        },
         "typography": {
           "borderRadius": "rounded-2xl",
           "headingFont": "Outfit, sans-serif",
           "bodyFont": "Plus Jakarta Sans, sans-serif"
         },
-        "version": 1,
-        "colors": {
-          "accent": "#F4D05F",
-          "background": "#FFFDF7",
-          "textPrimary": "#1F2937",
-          "primary": "#0B5D3B",
-          "surface": "#FFFFFF",
-          "secondary": "#F7931E"
-        },
         "sections": {
+          "benefits": {
+            "items": [
+              {
+                "desc": {
+                  "bn": "কোনো কৃত্রিম গন্ধ বা ক্ষতিকর রঙ নেই",
+                  "en": "Zero artificial flavors or chemicals"
+                },
+                "title": {
+                  "bn": "১০০% খাঁটি ও তাজা উপকরণ",
+                  "en": "100% Pure & Fresh Ingredients"
+                },
+                "icon": "Sparkles"
+              },
+              {
+                "icon": "Bike",
+                "desc": {
+                  "bn": "বেনাপোল শহর ও আশেপাশের এলাকায় সরাসরি পৌঁছায়",
+                  "en": "Direct to your door across Benapole"
+                },
+                "title": {
+                  "en": "Superfast Warm Delivery",
+                  "bn": "দ্রুততম গরম গরম ডেলিভারি"
+                }
+              },
+              {
+                "desc": {
+                  "bn": "ক্যাশ অন ডেলিভারি ও বিকাশ/নগদ সুবিধা",
+                  "en": "Cash on delivery, bKash & Nagad supported"
+                },
+                "title": {
+                  "en": "Convenient Cash & Mobile Pay",
+                  "bn": "সহজ ও নিরাপদ পেমেন্ট"
+                },
+                "icon": "ShieldCheck"
+              }
+            ],
+            "title": {
+              "en": "Why Choose Benapole Special?",
+              "bn": "কেন বেনাপোল স্পেশাল সেরা?"
+            },
+            "enabled": true
+          },
+          "header": {
+            "enabled": true,
+            "showLanguageSwitch": true,
+            "showSearch": true
+          },
+          "footer": {
+            "enabled": true,
+            "copyrightText": {
+              "en": "© 2026 Benapole Special. All rights reserved.",
+              "bn": "© ২০২৬ বেনাপোল স্পেশাল। সর্বস্বত্ব সংরক্ষিত।"
+            }
+          },
+          "hero": {
+            "badgeText": {
+              "en": "🔥 Benapole’s #1 Authentic Signature Delight",
+              "bn": "🔥 বেনাপোলের খাবার"
+            },
+            "ctaText": {
+              "bn": "অর্ডার করুন এখনই →",
+              "en": "Order Fresh Now →"
+            },
+            "subheading": {
+              "en": "Authentic taste in every bowl. Rich sweet curd, premium nuts & raisins. Order fresh to your doorstep!",
+              "bn": "এক বাটিতে স্বাদে ঐতিহ্য, সেরা খাঁটি মিষ্টি দই আর প্রিমিয়াম বাদাম-কিশমিশ। ঘরে বসেই অর্ডার করুন!"
+            },
+            "enabled": true,
+            "backgroundImage": "/images/doi_chira.jpg",
+            "headline": {
+              "bn": "বেনাপোল স্পেশাল দই চিড়া — এখন অনলাইনে!",
+              "en": "Benapole Special Doi Chira — Now Online!"
+            }
+          },
+          "about": {
+            "image": "/images/restaurant_interior.jpg",
+            "story": {
+              "bn": "বেনাপোল স্পেশাল শুরু হয়েছিল সাধারণ একটি ভালোবাসার স্বপ্ন থেকে—বেনাপোলের মানুষকে খাঁটি, স্বাস্থ্যকর এবং অতুলনীয় স্বাদের স্পেশাল দই চিড়া ও ফাস্টফুড উপহার দেওয়া। প্রতিটি বাটিতে আমরা দিই নিখাদ যত্ন আর আন্তরিকতা।",
+              "en": "Benapole Special was founded with a passion to bring pure, hygienic, and deliciously traditional Doi Chira and artisan fast foods to food lovers. Every bowl is made with authentic love and culinary craftsmanship."
+            },
+            "title": {
+              "bn": "আমাদের ঐতিহ্যের গল্প",
+              "en": "Our Story & Tradition"
+            },
+            "features": [
+              {
+                "en": "Natural & wholesome nutrition",
+                "bn": "প্রাকৃতিক ও পুষ্টিকর উপাদান"
+              },
+              {
+                "en": "Clean & certified hygienic preparation",
+                "bn": "পরিষ্কার-পরিচ্ছন্ন স্বাস্থ্যকর কিচেন"
+              },
+              {
+                "bn": "পরিবার ও বন্ধুদের সাথে বসার চমৎকার পরিবেশ",
+                "en": "Warm ambiance for families and friends"
+              }
+            ],
+            "enabled": true
+          },
+          "offers": {
+            "title": {
+              "en": "Today’s Special Offers & Coupons",
+              "bn": "আজকের বিশেষ অফার ও ছাড়"
+            },
+            "enabled": true
+          },
+          "categories": {
+            "enabled": true,
+            "title": {
+              "en": "Explore Menu Categories",
+              "bn": "খাবারের ক্যাটাগরি"
+            }
+          },
+          "contactLocation": {
+            "title": {
+              "en": "Contact & Location",
+              "bn": "যোগাযোগ ও লোকেশন"
+            },
+            "enabled": true
+          },
           "featuredFoods": {
+            "title": {
+              "en": "Bestsellers & Special Items",
+              "bn": "জনপ্রিয় ও স্পেশাল খাবার"
+            },
             "enabled": true,
             "subtitle": {
               "en": "Hand-picked customer favorites prepared fresh to order",
               "bn": "আমাদের সবচেয়ে পছন্দের ও চাহিদাসম্পন্ন সুস্বাদু মেনু"
-            },
-            "title": {
-              "en": "Bestsellers & Special Items",
-              "bn": "জনপ্রিয় ও স্পেশাল খাবার"
             }
+          },
+          "gallery": {
+            "images": [
+              "/images/doi_chira.jpg",
+              "/images/nachos.jpg",
+              "/images/chowmein.jpg",
+              "/images/burger.jpg",
+              "/images/restaurant_interior.jpg"
+            ],
+            "enabled": true,
+            "title": {
+              "bn": "রেস্টুরেন্টের ফটো গ্যালারি",
+              "en": "Restaurant Moments & Atmosphere"
+            }
+          }
+        },
+        "version": 2
+      },
+      "version": 2,
+      "publishedAt": "2026-10-20T10:44:12.113Z"
+    },
+    {
+      "version": 1,
+      "publishedAt": "2026-10-11T00:38:13.072Z",
+      "theme": {
+        "colors": {
+          "accent": "#F4D05F",
+          "secondary": "#F7931E",
+          "primary": "#0B5D3B",
+          "background": "#FFFDF7",
+          "textPrimary": "#1F2937",
+          "surface": "#FFFFFF"
+        },
+        "sections": {
+          "benefits": {
+            "items": [
+              {
+                "desc": {
+                  "en": "Zero artificial flavors or chemicals",
+                  "bn": "কোনো কৃত্রিম গন্ধ বা ক্ষতিকর রঙ নেই"
+                },
+                "title": {
+                  "en": "100% Pure & Fresh Ingredients",
+                  "bn": "১০০% খাঁটি ও তাজা উপকরণ"
+                },
+                "icon": "Sparkles"
+              },
+              {
+                "title": {
+                  "en": "Superfast Warm Delivery",
+                  "bn": "দ্রুততম গরম গরম ডেলিভারি"
+                },
+                "desc": {
+                  "en": "Direct to your door across Benapole",
+                  "bn": "বেনাপোল শহর ও আশেপাশের এলাকায় সরাসরি পৌঁছায়"
+                },
+                "icon": "Bike"
+              },
+              {
+                "icon": "ShieldCheck",
+                "title": {
+                  "en": "Convenient Cash & Mobile Pay",
+                  "bn": "সহজ ও নিরাপদ পেমেন্ট"
+                },
+                "desc": {
+                  "en": "Cash on delivery, bKash & Nagad supported",
+                  "bn": "ক্যাশ অন ডেলিভারি ও বিকাশ/নগদ সুবিধা"
+                }
+              }
+            ],
+            "enabled": true,
+            "title": {
+              "bn": "কেন বেনাপোল স্পেশাল সেরা?",
+              "en": "Why Choose Benapole Special?"
+            }
+          },
+          "hero": {
+            "headline": {
+              "bn": "বেনাপোল স্পেশাল দই চিড়া — এখন অনলাইনে!",
+              "en": "Benapole Special Doi Chira — Now Online!"
+            },
+            "subheading": {
+              "en": "Authentic taste in every bowl. Rich sweet curd, premium nuts & raisins. Order fresh to your doorstep!",
+              "bn": "এক বাটিতে স্বাদে ঐতিহ্য, সেরা খাঁটি মিষ্টি দই আর প্রিমিয়াম বাদাম-কিশমিশ। ঘরে বসেই অর্ডার করুন!"
+            },
+            "backgroundImage": "/images/doi_chira.jpg",
+            "ctaText": {
+              "bn": "অর্ডার করুন এখনই →",
+              "en": "Order Fresh Now →"
+            },
+            "enabled": true,
+            "badgeText": {
+              "bn": "🔥 বেনাপোলের সেরা ঐতিহ্যবাহী খাবার",
+              "en": "🔥 Benapole’s #1 Authentic Signature Delight"
+            }
+          },
+          "contactLocation": {
+            "title": {
+              "en": "Contact & Location",
+              "bn": "যোগাযোগ ও লোকেশন"
+            },
+            "enabled": true
+          },
+          "featuredFoods": {
+            "subtitle": {
+              "bn": "আমাদের সবচেয়ে পছন্দের ও চাহিদাসম্পন্ন সুস্বাদু মেনু",
+              "en": "Hand-picked customer favorites prepared fresh to order"
+            },
+            "enabled": true,
+            "title": {
+              "bn": "জনপ্রিয় ও স্পেশাল খাবার",
+              "en": "Bestsellers & Special Items"
+            }
+          },
+          "header": {
+            "showSearch": true,
+            "showLanguageSwitch": true,
+            "enabled": true
+          },
+          "categories": {
+            "title": {
+              "bn": "খাবারের ক্যাটাগরি",
+              "en": "Explore Menu Categories"
+            },
+            "enabled": true
+          },
+          "footer": {
+            "copyrightText": {
+              "bn": "© ২০২৬ বেনাপোল স্পেশাল। সর্বস্বত্ব সংরক্ষিত।",
+              "en": "© 2026 Benapole Special. All rights reserved."
+            },
+            "enabled": true
+          },
+          "gallery": {
+            "images": [
+              "/images/doi_chira.jpg",
+              "/images/nachos.jpg",
+              "/images/chowmein.jpg",
+              "/images/burger.jpg",
+              "/images/restaurant_interior.jpg"
+            ],
+            "title": {
+              "bn": "রেস্টুরেন্টের ফটো গ্যালারি",
+              "en": "Restaurant Moments & Atmosphere"
+            },
+            "enabled": true
           },
           "offers": {
             "enabled": true,
             "title": {
-              "en": "Today’s Special Offers & Coupons",
-              "bn": "আজকের বিশেষ অফার ও ছাড়"
+              "bn": "আজকের বিশেষ অফার ও ছাড়",
+              "en": "Today’s Special Offers & Coupons"
             }
           },
           "about": {
             "title": {
-              "en": "Our Story & Tradition",
-              "bn": "আমাদের ঐতিহ্যের গল্প"
+              "bn": "আমাদের ঐতিহ্যের গল্প",
+              "en": "Our Story & Tradition"
             },
             "features": [
               {
@@ -604,124 +954,26 @@
                 "en": "Clean & certified hygienic preparation"
               },
               {
-                "en": "Warm ambiance for families and friends",
-                "bn": "পরিবার ও বন্ধুদের সাথে বসার চমৎকার পরিবেশ"
+                "bn": "পরিবার ও বন্ধুদের সাথে বসার চমৎকার পরিবেশ",
+                "en": "Warm ambiance for families and friends"
               }
             ],
+            "enabled": true,
+            "image": "/images/restaurant_interior.jpg",
             "story": {
               "en": "Benapole Special was founded with a passion to bring pure, hygienic, and deliciously traditional Doi Chira and artisan fast foods to food lovers. Every bowl is made with authentic love and culinary craftsmanship.",
               "bn": "বেনাপোল স্পেশাল শুরু হয়েছিল সাধারণ একটি ভালোবাসার স্বপ্ন থেকে—বেনাপোলের মানুষকে খাঁটি, স্বাস্থ্যকর এবং অতুলনীয় স্বাদের স্পেশাল দই চিড়া ও ফাস্টফুড উপহার দেওয়া। প্রতিটি বাটিতে আমরা দিই নিখাদ যত্ন আর আন্তরিকতা।"
-            },
-            "enabled": true,
-            "image": "/images/restaurant_interior.jpg"
-          },
-          "footer": {
-            "copyrightText": {
-              "en": "© 2026 Benapole Special. All rights reserved.",
-              "bn": "© ২০২৬ বেনাপোল স্পেশাল। সর্বস্বত্ব সংরক্ষিত।"
-            },
-            "enabled": true
-          },
-          "gallery": {
-            "title": {
-              "bn": "রেস্টুরেন্টের ফটো গ্যালারি",
-              "en": "Restaurant Moments & Atmosphere"
-            },
-            "enabled": true,
-            "images": [
-              "/images/doi_chira.jpg",
-              "/images/nachos.jpg",
-              "/images/chowmein.jpg",
-              "/images/burger.jpg",
-              "/images/restaurant_interior.jpg"
-            ]
-          },
-          "contactLocation": {
-            "enabled": true,
-            "title": {
-              "en": "Contact & Location",
-              "bn": "যোগাযোগ ও লোকেশন"
             }
-          },
-          "categories": {
-            "title": {
-              "en": "Explore Menu Categories",
-              "bn": "খাবারের ক্যাটাগরি"
-            },
-            "enabled": true
-          },
-          "hero": {
-            "enabled": true,
-            "subheading": {
-              "bn": "এক বাটিতে স্বাদে ঐতিহ্য, সেরা খাঁটি মিষ্টি দই আর প্রিমিয়াম বাদাম-কিশমিশ। ঘরে বসেই অর্ডার করুন!",
-              "en": "Authentic taste in every bowl. Rich sweet curd, premium nuts & raisins. Order fresh to your doorstep!"
-            },
-            "badgeText": {
-              "en": "🔥 Benapole’s #1 Authentic Signature Delight",
-              "bn": "🔥 বেনাপোলের সেরা ঐতিহ্যবাহী খাবার"
-            },
-            "backgroundImage": "/images/doi_chira.jpg",
-            "headline": {
-              "en": "Benapole Special Doi Chira — Now Online!",
-              "bn": "বেনাপোল স্পেশাল দই চিড়া — এখন অনলাইনে!"
-            },
-            "ctaText": {
-              "bn": "অর্ডার করুন এখনই →",
-              "en": "Order Fresh Now →"
-            }
-          },
-          "benefits": {
-            "title": {
-              "bn": "কেন বেনাপোল স্পেশাল সেরা?",
-              "en": "Why Choose Benapole Special?"
-            },
-            "enabled": true,
-            "items": [
-              {
-                "desc": {
-                  "en": "Zero artificial flavors or chemicals",
-                  "bn": "কোনো কৃত্রিম গন্ধ বা ক্ষতিকর রঙ নেই"
-                },
-                "icon": "Sparkles",
-                "title": {
-                  "bn": "১০০% খাঁটি ও তাজা উপকরণ",
-                  "en": "100% Pure & Fresh Ingredients"
-                }
-              },
-              {
-                "title": {
-                  "en": "Superfast Warm Delivery",
-                  "bn": "দ্রুততম গরম গরম ডেলিভারি"
-                },
-                "icon": "Bike",
-                "desc": {
-                  "en": "Direct to your door across Benapole",
-                  "bn": "বেনাপোল শহর ও আশেপাশের এলাকায় সরাসরি পৌঁছায়"
-                }
-              },
-              {
-                "title": {
-                  "en": "Convenient Cash & Mobile Pay",
-                  "bn": "সহজ ও নিরাপদ পেমেন্ট"
-                },
-                "icon": "ShieldCheck",
-                "desc": {
-                  "bn": "ক্যাশ অন ডেলিভারি ও বিকাশ/নগদ সুবিধা",
-                  "en": "Cash on delivery, bKash & Nagad supported"
-                }
-              }
-            ]
-          },
-          "header": {
-            "enabled": true,
-            "showSearch": true,
-            "showLanguageSwitch": true
           }
         },
+        "version": 1,
+        "typography": {
+          "bodyFont": "Plus Jakarta Sans, sans-serif",
+          "borderRadius": "rounded-2xl",
+          "headingFont": "Outfit, sans-serif"
+        },
         "publishedAt": "2026-10-11T00:38:13.072Z"
-      },
-      "publishedAt": "2026-10-11T00:38:13.072Z",
-      "version": 1
+      }
     }
   ],
   "adminPasswordHash": "benapole123"

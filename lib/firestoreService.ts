@@ -41,6 +41,14 @@ export interface FirestoreErrorInfo {
   };
 }
 
+/**
+ * Strips all undefined fields recursively from objects/arrays
+ * so Firestore setDoc / updateDoc never throws "Unsupported field value: undefined".
+ */
+export function cleanPayload<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 export function handleFirestoreError(
   error: unknown,
   operationType: OperationType,
@@ -71,10 +79,13 @@ export async function saveOrderToFirestore(order: Order): Promise<void> {
   const path = `orders/${order.id}`;
   try {
     const orderRef = doc(db, 'orders', order.id);
-    await setDoc(orderRef, {
-      ...order,
-      syncedAt: new Date().toISOString(),
-    });
+    await setDoc(
+      orderRef,
+      cleanPayload({
+        ...order,
+        syncedAt: new Date().toISOString(),
+      })
+    );
   } catch (error: unknown) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -114,7 +125,7 @@ export async function updateOrderStatusInFirestore(
     if (paymentStatus) {
       updates.paymentStatus = paymentStatus;
     }
-    await updateDoc(orderRef, updates);
+    await updateDoc(orderRef, cleanPayload(updates));
   } catch (error: unknown) {
     handleFirestoreError(error, OperationType.UPDATE, path);
   }
@@ -234,18 +245,21 @@ export async function saveMenuToFirestore(
       updatedAt: new Date().toISOString(),
     };
 
-    // Save to primary singleton path
-    await setDoc(menuRef, payload);
+    // Save to primary singleton path (cleanPayload strips undefined values)
+    await setDoc(menuRef, cleanPayload(payload));
 
     // Also mirror to legacy path for compatibility
     const legacyRef = doc(db, 'config', 'menu_catalog');
-    await setDoc(legacyRef, {
-      foods,
-      categories,
-      offers,
-      version: nextVersion,
-      syncedAt: payload.updatedAt,
-    });
+    await setDoc(
+      legacyRef,
+      cleanPayload({
+        foods,
+        categories,
+        offers,
+        version: nextVersion,
+        syncedAt: payload.updatedAt,
+      })
+    );
 
     return nextVersion;
   } catch (error: unknown) {
@@ -285,10 +299,13 @@ export async function saveSettingsToFirestore(
   const path = 'config/restaurant_settings';
   try {
     const settingsRef = doc(db, 'config', 'restaurant_settings');
-    await setDoc(settingsRef, {
-      ...settings,
-      updatedAt: new Date().toISOString(),
-    });
+    await setDoc(
+      settingsRef,
+      cleanPayload({
+        ...settings,
+        updatedAt: new Date().toISOString(),
+      })
+    );
   } catch (error: unknown) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -325,12 +342,15 @@ export async function saveThemeToFirestore(
   const path = 'config/theme';
   try {
     const themeRef = doc(db, 'config', 'theme');
-    await setDoc(themeRef, {
-      draftTheme,
-      publishedTheme,
-      history,
-      updatedAt: new Date().toISOString(),
-    });
+    await setDoc(
+      themeRef,
+      cleanPayload({
+        draftTheme,
+        publishedTheme,
+        history,
+        updatedAt: new Date().toISOString(),
+      })
+    );
   } catch (error: unknown) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -356,10 +376,13 @@ export async function saveAdminAuthToFirestore(adminPasswordHash: string): Promi
   const path = 'config/admin_auth';
   try {
     const authRef = doc(db, 'config', 'admin_auth');
-    await setDoc(authRef, {
-      adminPasswordHash,
-      updatedAt: new Date().toISOString(),
-    });
+    await setDoc(
+      authRef,
+      cleanPayload({
+        adminPasswordHash,
+        updatedAt: new Date().toISOString(),
+      })
+    );
   } catch (error: unknown) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
@@ -398,10 +421,13 @@ export async function saveReviewToFirestore(review: CustomerReview): Promise<voi
   const path = `reviews/${review.id}`;
   try {
     const reviewRef = doc(db, 'reviews', review.id);
-    await setDoc(reviewRef, {
-      ...review,
-      createdAt: new Date().toISOString(),
-    });
+    await setDoc(
+      reviewRef,
+      cleanPayload({
+        ...review,
+        createdAt: new Date().toISOString(),
+      })
+    );
   } catch (error: unknown) {
     handleFirestoreError(error, OperationType.WRITE, path);
   }
